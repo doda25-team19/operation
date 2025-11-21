@@ -16,3 +16,6 @@ This week I worked on A1/F6 Flexible Containers. I made it possible to define th
 
 - Mikolaj: This week I worked on A1/F8 – Automated container image releases. 
 I prepared the initial draft of the workflow for releasing the container images. Due to a family emergency, I wasn’t able to complete the implementation yet. The team is aware, and we agreed that I will finalize and commit it at the beginning of Q2.3.
+
+- Viktor: https://github.com/doda25-team19/app/pull/2
+This week, Viktor worked on A1/F3. He created Dockerfiles for the app and model-service that allows to build two container images.
