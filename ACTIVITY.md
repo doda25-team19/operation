@@ -14,3 +14,5 @@ This week I worked on A1/F1 Version-aware Library. I implemented the VersionUtil
 - Benas: https://github.com/doda25-team19/app/pull/3 https://github.com/doda25-team19/model-service/pull/1
 This week I worked on A1/F6 Flexible Containers. I made it possible to define the port on which the app and the model-service run through an ENV variable.
 
+- Mikolaj: This week I worked on A1/F8 – Automated container image releases. 
+I prepared the initial draft of the workflow for releasing the container images. Due to a family emergency, I wasn’t able to complete the implementation yet. The team is aware, and we agreed that I will finalize and commit it at the beginning of Q2.3.
