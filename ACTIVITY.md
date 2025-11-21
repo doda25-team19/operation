@@ -11,5 +11,6 @@ For this week I worked on A1/F7 - docker compose. I built and pushed the images 
 - Arda: https://github.com/doda25-team19/lib-version/pull/1
 This week I worked on A1/F1 Version-aware Library. I implemented the VersionUtil class and configured Maven resource filtering to inject the version directly from the pom.xml metadata.
 
-
+- Benas: https://github.com/doda25-team19/app/pull/3 https://github.com/doda25-team19/model-service/pull/1
+This week I worked on A1/F6 Flexible Containers. I made it possible to define the port on which the app and the model-service run through an ENV variable.
 
