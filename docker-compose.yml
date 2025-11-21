@@ -1,6 +1,6 @@
 services:
   model-service:
-    image: ghcr.io/doda-team19/model-service:${MODEL_SERVICE_IMAGE_TAG}
+    image: ghcr.io/doda25-team19/model-service:${MODEL_SERVICE_IMAGE_TAG}
     environment:
       - MODEL_PORT=${MODEL_PORT}
     expose:
@@ -10,7 +10,7 @@ services:
     restart: unless-stopped
 
   app:
-    image: ghcr.io/doda-team19/app:${APP_IMAGE_TAG}
+    image: ghcr.io/doda25-team19/app:${APP_IMAGE_TAG}
     environment:
       - APP_PORT=${APP_PORT}
       - MODEL_HOST=http://model-service:${MODEL_PORT}
@@ -19,3 +19,5 @@ services:
     depends_on:
       - model-service
     restart: unless-stopped
+volumes:
+  model-data:
