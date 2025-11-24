@@ -70,6 +70,37 @@ Vagrant.configure("2") do |config|
       end
     end
   end
+  
+
+# --- Ansible Provisioning ---
+  ansible_extra_vars = {
+    'num_workers' => NUM_WORKERS,
+    'ip_base'     => IP_BASE
+  }
+
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "general.yaml"
+    ansible.extra_vars = ansible_extra_vars
+  end
+
+  config.vm.define "ctrl" do |ctrl|
+    ctrl.vm.provision "ansible" do |ansible|
+      ansible.playbook = "ctrl.yaml"
+      ansible.limit = "ctrl"
+      ansible.extra_vars = ansible_extra_vars
+    end
+  end
+
+  # --- Worker Nodes (Loop) ---
+  (1..NUM_WORKERS).each do |i|
+    config.vm.define "node-#{i}" do |node|
+      node.vm.provision "ansible" do |ansible|
+        ansible.playbook = "node.yaml"
+        ansible.limit = "node-#{i}"
+        ansible.extra_vars = ansible_extra_vars
+      end
+    end
+  end
 
   # --- Inventory Generation (Required for "Excellent" Grade) ---
   # This script runs on your HOST machine after the VMs start

@@ -1,0 +1,10 @@
+127.0.0.1       localhost
+::1             localhost ip6-localhost ip6-loopback
+
+# Controller
+{{ ip_base }}.100       ctrl
+
+# Workers
+{% for i in range(1, num_workers|int + 1) %}
+{{ ip_base }}.{{ 100 + i }}    node-{{ i }}
+{% endfor %}
