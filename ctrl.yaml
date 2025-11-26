@@ -1,0 +1,8 @@
+---
+- name: Controller Node Setup
+  hosts: ctrl
+  become: yes
+  tasks:
+    - name: Placeholder for controller setup
+      debug:
+        msg: "Starting controller setup"

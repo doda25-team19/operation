@@ -1,0 +1,8 @@
+---
+- name: Worker Nodes Setup
+  hosts: all
+  become: yes
+  tasks:
+    - name: Worker Nodes - Placeholder
+      ansible.builtin.debug:
+        msg: "Starting worker-specific setup on {{ inventory_hostname }}."

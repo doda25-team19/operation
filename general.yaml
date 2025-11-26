@@ -1,0 +1,98 @@
+---
+- name: General Kubernetes Setup
+  hosts: all
+  become: yes
+  tasks:
+  
+    # -------------------------------
+    # Step 3: Provision with Ansible
+    # -------------------------------
+
+    - name: Placeholder for task 3
+      debug:
+        msg: "Starting general setup on {{ inventory_hostname }}"
+
+    # -------------------------------
+    # Step 4: Register SSH Keys
+    # -------------------------------
+
+    - name: Ensure ~/.ssh exists for vagrant user
+      ansible.builtin.file:
+        path: /home/vagrant/.ssh
+        state: directory
+        owner: vagrant
+        group: vagrant
+        mode: '0700'
+
+    - name: Install all team public SSH keys into authorized_keys
+      ansible.builtin.authorized_key:
+        user: vagrant
+        state: present
+        key: "{{ lookup('file', item) }}"
+      loop: "{{ lookup('fileglob', './ssh_keys/*.pub', wantlist=True) }}"
+
+    # -------------------------------
+    # Step 5: Disable SWAP
+    # -------------------------------
+
+    - name: Disable swap immediately
+      ansible.builtin.shell: "swapoff -a"
+      when: ansible_swaptotal_mb | int > 0
+
+    - name: Remove swap entry from /etc/fstab
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        regexp: '^\s*[^#].*\s+swap\s+.*$'
+        state: absent
+
+    # -------------------------------
+    # Step 6: br_netﬁlter
+    # -------------------------------
+
+    - name: Ensure overlay and br_netfilter load on boot
+      ansible.builtin.copy:
+        dest: /etc/modules-load.d/k8s.conf
+        content: |
+          overlay
+          br_netfilter
+
+    - name: Load overlay module now
+      ansible.builtin.modprobe:
+        name: overlay
+        state: present
+
+    - name: Load br_netfilter now
+      ansible.builtin.modprobe:
+        name: br_netfilter
+        state: present
+
+    # -------------------------------
+    # Step 7: Enable IPv4 forwarding
+    # -------------------------------
+
+    - name: Configure required sysctl parameters
+      ansible.posix.sysctl:
+        name: "{{ item.key }}"
+        value: "{{ item.value }}"
+        state: present
+        sysctl_file: /etc/sysctl.d/k8s.conf
+        reload: yes
+      loop:
+        - { key: net.bridge.bridge-nf-call-iptables, value: '1' }
+        - { key: net.bridge.bridge-nf-call-ip6tables, value: '1' }
+        - { key: net.ipv4.ip_forward, value: '1' }
+      tags: [k8s-prereq]
+
+
+    # -------------------------------
+    # Step 8: Manage /etc/hosts
+    # -------------------------------
+
+    - name: Generate and copy /etc/hosts file
+      ansible.builtin.template:
+        src: hosts.j2
+        dest: /etc/hosts
+        owner: root
+        group: root
+        mode: '0644'
+      tags: [network]
