@@ -2,7 +2,100 @@
 - name: Controller Node Setup
   hosts: ctrl
   become: yes
+  vars:
+    # defaults, in case Vagrant doesn't pass them (safety net)
+    ip_base: "192.168.56"
+    controller_ip: "{{ ip_base }}.100"
+    pod_network_cidr: "10.244.0.0/16"
+
   tasks:
-    - name: Placeholder for controller setup
-      debug:
-        msg: "Starting controller setup"
+    # -------------------------------
+    # Step 12: Kubelet (Ensuring it's enabled)
+    # -------------------------------
+    - name: Enable and start kubelet service
+      ansible.builtin.service:
+        name: kubelet
+        enabled: yes
+        state: started
+
+    # -------------------------------
+    # Step 13: Init Cluster
+    # -------------------------------
+    - name: Check if Kubernetes cluster is already initialized
+      ansible.builtin.stat:
+        path: /etc/kubernetes/admin.conf
+      register: kube_conf
+
+    - name: Initialize Kubernetes Cluster
+      ansible.builtin.command: >
+        kubeadm init
+        --apiserver-advertise-address={{ controller_ip }}
+        --node-name=ctrl
+        --pod-network-cidr={{ pod_network_cidr }}
+      when: not kube_conf.stat.exists
+
+    # -------------------------------
+    # Step 14: Setup kubectl
+    # -------------------------------
+    - name: Create .kube directory for vagrant user
+      ansible.builtin.file:
+        path: /home/vagrant/.kube
+        state: directory
+        owner: vagrant
+        group: vagrant
+        mode: '0755'
+
+    - name: Copy admin.conf to vagrant user config
+      ansible.builtin.copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /home/vagrant/.kube/config
+        remote_src: yes
+        owner: vagrant
+        group: vagrant
+        mode: '0600'
+    
+    # excellent Requirement: Host-based kubectl access
+    - name: Fetch admin.conf to host
+      ansible.builtin.fetch:
+        src: /etc/kubernetes/admin.conf
+        dest: ./kubeconfig
+        flat: yes
+
+    # -------------------------------
+    # Step 15: Create Pod Network (Flannel)
+    # -------------------------------
+    - name: Download Flannel manifest
+      ansible.builtin.get_url:
+        url: https://github.com/flannel-io/flannel/releases/download/v0.26.7/kube-flannel.yml
+        dest: /tmp/kube-flannel.yml
+
+    - name: Patch Flannel to use eth1 (Required for Vagrant Host-Only)
+      ansible.builtin.replace:
+        path: /tmp/kube-flannel.yml
+        regexp: '        - --kube-subnet-mgr'
+        replace: '        - --kube-subnet-mgr\n        - --iface=eth1'
+
+    - name: Apply Flannel manifest
+      ansible.builtin.command: kubectl apply -f /tmp/kube-flannel.yml
+      become_user: vagrant
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+      # run if we just initialized or if we explicitly want to ensure it's there
+      when: not kube_conf.stat.exists
+
+    # -------------------------------
+    # Step 16: Install Helm
+    # -------------------------------
+    - name: Install Helm (curl method)
+      ansible.builtin.shell: curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      args:
+        creates: /usr/local/bin/helm
+
+    # -------------------------------
+    # Step 17: Install Helm Diff Plugin
+    # -------------------------------
+    - name: Install Helm Diff Plugin
+      become_user: vagrant
+      ansible.builtin.command: helm plugin install https://github.com/databus23/helm-diff
+      args:
+        creates: /home/vagrant/.local/share/helm/plugins/helm-diff

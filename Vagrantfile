@@ -21,8 +21,8 @@ else
   # Settings for Linux/Intel
   BOX_IMAGE = "bento/ubuntu-24.04"
   PROVIDER = "virtualbox"
-  CTRL_MEM = 4096
-  WORKER_MEM = 6144
+  CTRL_MEM = 3072
+  WORKER_MEM = 2048
 end
 
 Vagrant.configure("2") do |config|
@@ -102,16 +102,17 @@ Vagrant.configure("2") do |config|
     end
   end
 
-  # --- Inventory Generation (Required for "Excellent" Grade) ---
-  # This script runs on your HOST machine after the VMs start
-  config.trigger.after :up do |trigger|
+  # --- Inventory Generation ---
+  config.trigger.after [:up, :reload, :provision] do |trigger|
+    trigger.name = "Generate Inventory"
     trigger.run = {inline: "bash -c '
       echo \"[controllers]\" > inventory.cfg
-      echo \"ctrl ansible_host=#{IP_BASE}.100 ansible_user=vagrant\" >> inventory.cfg
+      # Use #{PROVIDER} to automatically switch between virtualbox/vmware_desktop
+      echo \"ctrl ansible_host=#{IP_BASE}.100 ansible_user=vagrant ansible_ssh_private_key_file=.vagrant/machines/ctrl/#{PROVIDER}/private_key\" >> inventory.cfg
       echo \"\" >> inventory.cfg
       echo \"[workers]\" >> inventory.cfg
       for i in {1..#{NUM_WORKERS}}; do
-        echo \"node-$i ansible_host=#{IP_BASE}.$((100+i)) ansible_user=vagrant\" >> inventory.cfg
+        echo \"node-$i ansible_host=#{IP_BASE}.$((100+i)) ansible_user=vagrant ansible_ssh_private_key_file=.vagrant/machines/node-$i/#{PROVIDER}/private_key\" >> inventory.cfg
       done
     '"}
   end
