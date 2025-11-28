@@ -48,21 +48,8 @@ Vagrant.configure("2") do |config|
         v.gui = false
         v.allowlist_verified = true
       end
-
-
-        ctrl.vm.provision "ansible" do |ansible|
-          ansible.playbook = "general.yaml"
-          ansible.extra_vars = {
-            ip_base: IP_BASE,
-            num_workers: NUM_WORKERS
-          }
-        end
-
-        # Provisioner for controller-specific setup
-        ctrl.vm.provision "ansible" do |ansible|
-          ansible.playbook = "ctrl.yaml"
-        end
-      end
+    end
+  end
 
   # --- Worker Nodes (Loop) ---
   (1..NUM_WORKERS).each do |i|
