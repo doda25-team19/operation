@@ -23,3 +23,6 @@ This week, Viktor worked on A1/F3. He created Dockerfiles for the app and model-
 ### Week Q2.3
 - Arda: https://github.com/doda25-team19/lib-version/pull/3 https://github.com/doda25-team19/operation/pull/6
 This week I worked on A1/F11 and A2/Steps 13-17. I implemented advanced versioning workflows for lib-version and automated the Kubernetes Controller provisioning (including Flannel, Helm, and dynamic inventory generation) for the cluster setup.
+
+- Benas: https://github.com/doda25-team19/operation/pull/3
+This week I implemented Steps 3-8 of A2. I created and tested the Ansible playbooks, added SSH key registration, disabled swap, loaded required kernel modules, enabled sysctl settings, and generated dynamic /etc/hosts files for all VMs.
