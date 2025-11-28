@@ -26,3 +26,6 @@ This week I worked on A1/F11 and A2/Steps 13-17. I implemented advanced versioni
 
 - Benas: https://github.com/doda25-team19/operation/pull/3
 This week I implemented Steps 3-8 of A2. I created and tested the Ansible playbooks, added SSH key registration, disabled swap, loaded required kernel modules, enabled sysctl settings, and generated dynamic /etc/hosts files for all VMs.
+
+- Miroslav: https://github.com/doda25-team19/operation/pull/5
+This week I worked on steps 9-12 of A2, preped the VMs for kubernetes by installing the required tools at the right versions.
