@@ -29,3 +29,6 @@ This week I implemented Steps 3-8 of A2. I created and tested the Ansible playbo
 
 - Miroslav: https://github.com/doda25-team19/operation/pull/5
 This week I worked on steps 9-12 of A2, preped the VMs for kubernetes by installing the required tools at the right versions.
+
+- Mikolaj: https://github.com/doda25-team19/operation/pull/7
+This week I worked on A2/Steps 18–20, implementing the Ansible automation for joining worker nodes to the Kubernetes cluster and adding the finalization playbook that installs and configures MetalLB. I also started working on A1/F10.
