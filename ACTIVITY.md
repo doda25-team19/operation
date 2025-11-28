@@ -32,3 +32,9 @@ This week I worked on steps 9-12 of A2, preped the VMs for kubernetes by install
 
 - Mikolaj: https://github.com/doda25-team19/operation/pull/7
 This week I worked on A2/Steps 18–20, implementing the Ansible automation for joining worker nodes to the Kubernetes cluster and adding the finalization playbook that installs and configures MetalLB. I also started working on A1/F10.
+
+- Jeroen: 
+    - https://github.com/doda25-team19/operation/pull/2 -
+    This week I worked on A2. I completed Step 1 and 2. created vm with vagrant. Dual configuration for ARM and INTEL architecture. Added network configuration to access the vm from host machine.
+    - https://github.com/doda25-team19/app/pull/6 -
+    This week I worked on A1/F5Add explicit clean up of apt cache in dockerfiles to reduce image size. The multistage build was already implemented.
