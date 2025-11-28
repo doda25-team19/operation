@@ -19,3 +19,7 @@ This week I worked on A1/F8 – Automated container image releases. I implemente
 
 - Viktor: https://github.com/doda25-team19/app/pull/2
 This week, Viktor worked on A1/F3. He created Dockerfiles for the app and model-service that allows to build two container images.
+
+### Week Q2.3
+- Arda: https://github.com/doda25-team19/lib-version/pull/3 https://github.com/doda25-team19/operation/pull/6
+This week I worked on A1/F11 and A2/Steps 13-17. I implemented advanced versioning workflows for lib-version and automated the Kubernetes Controller provisioning (including Flannel, Helm, and dynamic inventory generation) for the cluster setup.
