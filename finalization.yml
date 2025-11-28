@@ -1,0 +1,53 @@
+---
+- name: Finalize Kubernetes cluster
+  hosts: controllers
+  become: yes
+
+  vars:
+    metallb_manifest_url: "https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml"
+    metallb_pool_file: "/tmp/metallb-ip-pool.yml"
+
+  tasks:
+    - name: Install MetalLB CRDs and controller
+      ansible.builtin.command: >
+        kubectl apply -f {{ metallb_manifest_url }}
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+
+    - name: Wait for MetalLB controller to be ready
+      ansible.builtin.command: >
+        kubectl wait -n metallb-system
+        -l app=metallb,component=controller
+        --for=condition=ready pod
+        --timeout=60s
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+
+    - name: Create MetalLB IPAddressPool + L2Advertisement manifest
+      ansible.builtin.copy:
+        dest: "{{ metallb_pool_file }}"
+        mode: "0644"
+        content: |
+          apiVersion: metallb.io/v1beta1
+          kind: IPAddressPool
+          metadata:
+            name: doda-pool
+            namespace: metallb-system
+          spec:
+            addresses:
+              - 192.168.56.90-192.168.56.99
+          ---
+          apiVersion: metallb.io/v1beta1
+          kind: L2Advertisement
+          metadata:
+            name: doda-l2
+            namespace: metallb-system
+          spec:
+            ipAddressPools:
+              - doda-pool
+
+    - name: Apply MetalLB IPAddressPool and L2Advertisement
+      ansible.builtin.command: >
+        kubectl apply -f {{ metallb_pool_file }}
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
