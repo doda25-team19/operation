@@ -26,3 +26,10 @@ This week I worked on A1/F11 and A2/Steps 13-17. I implemented advanced versioni
 
 - Benas: https://github.com/doda25-team19/operation/pull/3
 This week I implemented Steps 3-8 of A2. I created and tested the Ansible playbooks, added SSH key registration, disabled swap, loaded required kernel modules, enabled sysctl settings, and generated dynamic /etc/hosts files for all VMs.
+
+- Jeroen: 
+    - https://github.com/doda25-team19/operation/pull/2 -
+    This week I worked on A2. I completed Step 1 and 2. created vm with vagrant. Dual configuration for ARM and INTEL architecture. Added network configuration to access the vm from host machine.
+    - https://github.com/doda25-team19/app/pull/6 -
+    This week I worked on A1/F5Add explicit clean up of apt cache in dockerfiles to reduce image size. The multistage build was already implemented.
+
