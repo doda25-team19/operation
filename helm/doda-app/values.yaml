@@ -1,0 +1,42 @@
+# Default values for the doda-app chart.
+
+# Global setting for the Ingress hostname.
+hostname: "doda-app.local"
+
+# Settings for the App Service (frontend/api)
+appService:
+  replicaCount: 1
+  image: "ghcr.io/doda25-team19/app:latest"
+  service:
+    port: 8080
+
+# Settings for the Model Service (backend)
+modelService:
+  replicaCount: 1
+  image: "ghcr.io/doda25-team19/model-service:latest"
+  service:
+    port: 8081
+
+# This is for the private registry secret.
+# hardcoded now, later, this could also be a variable.
+imagePullSecrets:
+  - name: ghcr-credentials
+
+# Values for the "Excellent" grade requirements
+# A generic ConfigMap to demonstrate usage
+appConfig:
+  someValue: "Hello from the ConfigMap!"
+  anotherValue: "42"
+
+# A generic Secret to demonstrate usage
+# The values must be base64 encoded.
+# "secret-sauce" -> c2VjcmV0LXNhdWNl
+# "super-secret" -> c3VwZXItc2VjcmV0
+appSecrets:
+  username: "c2VjcmV0LXNhdWNl"
+  password: "c3VwZXItc2VjcmV0"
+
+# For mounting a shared folder into a pod
+sharedVolume:
+  hostPath: "/mnt/shared"
+  mountPath: "/data/shared"
