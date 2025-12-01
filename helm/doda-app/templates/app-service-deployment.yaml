@@ -12,7 +12,7 @@ spec:
       labels:
         app: app-service
     spec:
-      imagePullSecrets: 
+      imagePullSecrets:
 {{ toYaml .Values.imagePullSecrets | nindent 8 }}
       containers:
       - name: app-service
@@ -27,3 +27,10 @@ spec:
             name: {{ .Release.Name }}-configmap
         - secretRef:
             name: {{ .Release.Name }}-secret
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
