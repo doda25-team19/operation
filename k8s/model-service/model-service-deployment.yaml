@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: model-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: model-service
+  template:
+    metadata:
+      labels:
+        app: model-service
+    spec:
+      containers:
+      - name: model-service
+        image: ghcr.io/doda25-team19/model-service:latest
+        ports:
+        - containerPort: 8081
