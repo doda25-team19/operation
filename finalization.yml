@@ -6,6 +6,9 @@
   vars:
     metallb_manifest_url: "https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml"
     metallb_pool_file: "/tmp/metallb-ip-pool.yml"
+    istio_version: "1.25.2"
+    istio_dir: "/vagrant/istio-1.25.2"
+    istio_archive: "/vagrant/istio-1.25.2-linux-amd64.tar.gz"
 
   tasks:
     - name: Install MetalLB CRDs and controller
@@ -49,5 +52,141 @@
     - name: Apply MetalLB IPAddressPool and L2Advertisement
       ansible.builtin.command: >
         kubectl apply -f {{ metallb_pool_file }}
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+
+
+    - name: Add ingress nginx Helm repo
+      ansible.builtin.command: >
+        helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+      args:
+        creates: /home/vagrant/.ingress_nginx_repo_added
+
+    - name: Mark ingress nginx repo as added
+      ansible.builtin.file:
+        path: /home/vagrant/.ingress_nginx_repo_added
+        state: touch
+        mode: "0644"
+
+    - name: Update Helm repos
+      ansible.builtin.command: >
+        helm repo update
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+
+    - name: Install or upgrade Nginx ingress controller
+      ansible.builtin.command: >
+        helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx
+        --namespace ingress-nginx
+        --create-namespace
+        --set controller.service.type=LoadBalancer
+        --set controller.service.loadBalancerIP=192.168.56.90
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+
+    - name: Wait for ingress controller pods to be ready
+      ansible.builtin.command: >
+        kubectl wait -n ingress-nginx
+        -l app.kubernetes.io/name=ingress-nginx
+        --for=condition=ready pod
+        --timeout=180s
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+
+    - name: Add Kubernetes dashboard Helm repo
+      ansible.builtin.command: >
+        helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+      args:
+        creates: /home/vagrant/.k8s_dashboard_repo_added
+
+    - name: Mark Kubernetes dashboard repo as added
+      ansible.builtin.file:
+        path: /home/vagrant/.k8s_dashboard_repo_added
+        state: touch
+        mode: "0644"
+
+    - name: Update Helm repos after adding dashboard
+      ansible.builtin.command: >
+        helm repo update
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+
+    - name: Install or upgrade Kubernetes dashboard
+      ansible.builtin.command: >
+        helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard
+        --namespace kubernetes-dashboard
+        --create-namespace
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+
+    - name: Apply dashboard admin user and binding
+      ansible.builtin.command: >
+        kubectl apply -f /vagrant/k8s/dashboard-admin-user.yaml
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+
+    - name: Apply dashboard ingress
+      ansible.builtin.command: >
+        kubectl apply -f /vagrant/k8s/dashboard-ingress.yaml
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+
+
+    - name: Download Istio archive
+      ansible.builtin.get_url:
+        url: "https://github.com/istio/istio/releases/download/{{ istio_version }}/istio-{{ istio_version }}-linux-amd64.tar.gz"
+        dest: "{{ istio_archive }}"
+        mode: "0644"
+
+    - name: Unpack Istio
+      ansible.builtin.unarchive:
+        src: "{{ istio_archive }}"
+        dest: /vagrant
+        remote_src: yes
+
+    - name: Ensure istioctl is on vagrant PATH
+      become: yes
+      become_user: vagrant
+      ansible.builtin.lineinfile:
+        path: /home/vagrant/.bashrc
+        line: 'export PATH=$PATH:/vagrant/istio-{{ istio_version }}/bin'
+        insertafter: EOF
+        state: present
+        create: yes
+        mode: "0644"
+
+    - name: Check if Istio namespace exists
+      ansible.builtin.command: >
+        kubectl get namespace istio-system
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+      register: istio_ns
+      failed_when: false
+      changed_when: false
+
+    - name: Run istioctl precheck
+      ansible.builtin.command: >
+        /vagrant/istio-{{ istio_version }}/bin/istioctl x precheck
+      when: istio_ns.rc != 0
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+
+    - name: Install Istio demo profile
+      ansible.builtin.command: >
+        /vagrant/istio-{{ istio_version }}/bin/istioctl install --set profile=demo -y
+      when: istio_ns.rc != 0
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+
+    - name: Wait for Istio control plane to be ready
+      ansible.builtin.command: >
+        kubectl wait -n istio-system
+        --for=condition=ready pod
+        --all
+        --timeout=300s
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
