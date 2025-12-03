@@ -12,6 +12,67 @@ The application consists of a microservices architecture:
 - **Model Service:** [doda25-team19/model-service](https://github.com/doda25-team19/model-service)
 - **Lib Version:** [doda25-team19/lib-version](https://github.com/doda25-team19/lib-version)
 
+
+---
+## Monitoring 
+
+### Installation Steps
+
+1. **Start Minikube**
+```
+minikube start
+```
+
+2. **Enable Ingress addon**
+```
+minikube addons enable ingress
+```
+
+3. **Wait for Ingress controller to be ready**
+```
+kubectl get pods -n ingress-nginx -w
+```
+
+4. **Update Helm dependencies**
+```
+   cd helm/doda-app
+   helm dependency update
+```
+
+5. **Install the application** (first time)
+```
+   helm install doda-app . -f values.yaml
+```
+   
+   **Or upgrade** (if already installed)
+```
+   helm upgrade doda-app . -f values.yaml
+```
+
+6. **Verify deployment**
+```bash
+   kubectl get pods
+   kubectl get servicemonitor
+   kubectl get ingress
+```
+
+## Testing
+
+### On macOS with Minikube
+Due to Docker networking limitations, use minikube service:
+```bash
+minikube service -n ingress-nginx ingress-nginx-controller --url
+```
+
+### Use first URL (HTTP port) for testing:
+
+```
+curl -H "Host: doda-app.local" http://127.0.0.1:XXXXX
+curl -H "Host: metrics.doda-app.local" http://127.0.0.1:XXXXX/metrics
+```
+
+If everything is correct, both curls should return an answer.
+
 ---
 
 ## Assignment 2: Provisioning a Kubernetes Cluster
