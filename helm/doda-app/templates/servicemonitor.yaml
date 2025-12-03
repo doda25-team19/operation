@@ -1,0 +1,21 @@
+{{- if .Values.prometheus.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Release.Name }}-app-service-metrics
+  labels:
+    app: doda-app
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  selector:
+    matchLabels:
+      app: app-service  # match the labels in app-service-service.yaml
+  endpoints:
+    - port: http        # match the port name in app-service-service.yaml
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+{{- end }}
