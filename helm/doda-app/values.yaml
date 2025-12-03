@@ -48,3 +48,13 @@ prometheus:
     serviceMonitorSelector:
       matchLabels:
         app: doda-app
+
+kube-prometheus-stack:
+  grafana:
+    sidecar:
+      dashboards:
+        enabled: true
+        label: grafana_dashboard
+        labelValue: "1"
+        searchNamespace: ALL
+
