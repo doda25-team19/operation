@@ -20,3 +20,15 @@ spec:
             name: app-service
             port:
               number: 80
+
+  # metrics endpoint
+  - host: {{ .Values.metricsHostname | quote }}
+    http:
+      paths:
+      - path: /metrics
+        pathType: Exact
+        backend:
+          service:
+            name: app-service
+            port:
+              number: 80

@@ -2,6 +2,7 @@
 
 # Global setting for the Ingress hostname.
 hostname: "doda-app.local"
+metricsHostname: "metrics.doda-app.local"
 
 # Settings for the App Service (frontend/api)
 appService:
@@ -40,3 +41,10 @@ appSecrets:
 sharedVolume:
   hostPath: "/mnt/shared"
   mountPath: "/data/shared"
+
+prometheus:
+  enabled: true
+  prometheusSpec:
+    serviceMonitorSelector:
+      matchLabels:
+        app: doda-app
