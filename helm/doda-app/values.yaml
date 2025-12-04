@@ -48,3 +48,34 @@ prometheus:
     serviceMonitorSelector:
       matchLabels:
         app: doda-app
+
+
+    ruleSelector:
+      matchLabels:
+        app: doda-app
+        role: alert-rules
+
+
+alertmanager:
+  enabled: true
+  alertmanagerSpec:
+    secrets:
+      - alertmanager-email-secret
+
+  config:
+    global:
+      resolve_timeout: 5m
+      smtp_smarthost: "smtp.gmail.com:587"
+      smtp_from: "placeholder@example.com"
+      smtp_auth_username: "placeholder@example.com"
+
+      # Alertmanager will read the password from this file
+      smtp_auth_password_file: "/etc/alertmanager/secrets/alertmanager-email-secret/password"
+
+    route:
+      receiver: "team-email"
+
+    receivers:
+      - name: "team-email"
+        email_configs:
+          - to: "placeholder@example.com"
