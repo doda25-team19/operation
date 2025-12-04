@@ -40,3 +40,23 @@ appSecrets:
 sharedVolume:
   hostPath: "/mnt/shared"
   mountPath: "/data/shared"
+
+grafana:
+  enabled: true
+
+  adminUser: admin
+  adminPassword: admin
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          url: http://doda-app-kube-prometheus-s-prometheus.default.svc.cluster.local:9090
+          access: proxy
+          isDefault: true
