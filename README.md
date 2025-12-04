@@ -23,6 +23,11 @@ The application consists of a microservices architecture:
 minikube start
 ```
 
+(Optionally, on macOS use the Docker driver for more stable networking:)
+```
+minikube start --driver=docker
+```
+
 2. **Enable Ingress addon**
 ```
 minikube addons enable ingress
