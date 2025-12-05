@@ -27,8 +27,6 @@ dependencies:
     version: 8.5.12
     repository: https://grafana.github.io/helm-charts
     condition: grafana.enabled
-
-dependencies:
   - name: kube-prometheus-stack
     version: "~65.0.0"  # Use latest stable version
     repository: https://prometheus-community.github.io/helm-charts
