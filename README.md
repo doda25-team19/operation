@@ -14,240 +14,141 @@ The application consists of a microservices architecture:
 
 ---
 
-## Assignment 3: Grafana & Dashboards
+## Assignment 3: Application Deployment & Monitoring
 
-### Application Deployment (Helm Chart)
+This section details how to deploy the application stack to Kubernetes using Helm and how to access the provisioned monitoring dashboards.
 
-This repository contains a Helm chart `doda-app` that deploys the complete application stack (Frontend, Backend, Ingress).
+### Prerequisites
+- A running Kubernetes cluster as provisioned in Assignment 2.
+- The `admin.conf` for your cluster is configured (e.g., via `export KUBECONFIG=$(pwd)/admin.conf`).
 
-#### 1. Installation
+### 1. Deploying the Application Stack
 
-To install the application with default settings:
+The `doda-app` Helm chart will deploy the application, Prometheus (for metrics), and Grafana (for dashboards) in one step.
 
-```bash
-cd operation/helm/doda-app
-helm install doda-app-release .
-```
+1.  **Navigate to the Helm Chart Directory:**
+    ```bash
+    cd operation/helm/doda-app
+    ```
 
-To uninstall:
+2.  **Update Helm Dependencies:**
+    This command downloads the required dependency charts (like Grafana and Prometheus).
+    ```bash
+    helm dependency update
+    ```
 
-```bash
-helm uninstall doda-app-release
-```
+3.  **Create SMTP Secret (for Alertmanager):**
+    This secret is required by the Prometheus stack for sending alerts.
+    ```bash
+    kubectl create secret generic alertmanager-email-secret \
+      --from-literal=password="password" \
+      -n default
+    ```
 
-#### 2. Configuration & Hostnames
+4.  **Install the Helm Chart:**
+    Use `helm install` for the first deployment.
+    ```bash
+    helm install doda-app-release . -f values.yaml
+    ```
+    *(If you need to update an existing deployment, use `helm upgrade` instead.)*
 
-To support grading or custom environments, you can override default values in `values.yaml`.
+### 2. Accessing the Services (Ingress)
 
-**Changing the Hostname (Required for Grading):**
-If you need to access the app via a different domain, override the hostname variable during installation:
+#### Accessing the Application
 
-```bash
-helm install doda-app-release . --set hostname="my-grading-url.local"
-```
+1.  **Find the Ingress IP Address:**
+    Get the external IP address assigned to the Ingress Controller by MetalLB.
+    ```bash
+    kubectl get svc -n ingress-nginx
+    ```
+    *Look for the `EXTERNAL-IP` of the `ingress-nginx-controller` service (e.g., `192.168.56.90`).*
 
-**Resource Limits:**
-CPU and Memory limits are configured by default but can be adjusted in `values.yaml` under `appService.resources` if the target environment has limited resources.
+2.  **Update Your Local `/etc/hosts` File:**
+    Add the following line to the `hosts` file on your host machine (not the VM).
+    ```
+    # Replace <EXTERNAL-IP> with the IP from the previous step
+    <EXTERNAL-IP> doda-app.local
+    ```
 
-#### 3. Accessing the Application
+3.  **Open in Browser:**
+    You can now access the application at **http://doda-app.local**.
 
-The application is exposed via an Ingress Controller.
+#### Accessing Grafana
 
-1. **Find the LoadBalancer IP:**
+1.  **Forward the Grafana Port:**
+    The easiest way to access the Grafana UI is via port-forwarding.
+    ```bash
+    # This command will continue running. Keep the terminal open.
+    kubectl port-forward svc/doda-app-release-grafana 3000:80
+    ```
 
-   ```bash
-   kubectl get svc -n ingress-nginx
-   ```
+2.  **Open in Browser:**
+    You can now access Grafana at **http://localhost:3000**.
 
-   Copy the `EXTERNAL-IP` (e.g., `192.168.56.90`).
+### 3. Monitoring with Prometheus & Grafana
 
-2. **Update Local DNS:**
-   Add the IP and hostname to your local `/etc/hosts` file (on your host machine, not the VM):
+#### Automatic Dashboard Provisioning
+The Helm chart is configured to **automatically provision** the required Grafana dashboards. **No manual import is needed.**
 
-   ```
-   # Replace <EXTERNAL-IP> with the IP from step 1
-   <EXTERNAL-IP> doda-app.local
-   ```
+Two dashboards are included in the `helm/doda-app/dashboards/` directory:
+-   `dashboard-overview.json`: An overview of all application metrics.
+-   `dashboard-a4.json`: Supports the A4 experiment analysis.
 
-3. **Browse:**
-   Open `http://doda-app.local` in your web browser.
+*Technical Note: During installation, these JSON files are packaged into a `ConfigMap` with the label `grafana_dashboard: "1"`. The Grafana sidecar automatically detects this label and loads the dashboards on startup.*
 
-#### Verification of Assignment Requirements
+### 4. Verifying "Excellent" Grade Criteria
 
-Run the following commands to verify that the *"Excellent"* grade criteria for Kubernetes Usage (A3) have been met.
+Run these commands to verify that the Kubernetes usage requirements have been met.
 
-**1. Verify ConfigMap & Secret Injection:**
-Demonstrates that the app-service consumes configuration and sensitive data via environment variables.
+#### ConfigMap & Secret Injection
+1.  **Get the App Pod Name:**
+    ```bash
+    APP_POD=$(kubectl get pod -l app=app-service -o jsonpath="{.items[0].metadata.name}")
+    ```
+2.  **Check for Injected Environment Variables:**
+    ```bash
+    kubectl describe pod $APP_POD | grep -A5 "Environment:"
+    ```
+    *The output should show environment variables mounted from `doda-app-release-configmap` and `doda-app-release-secret`.*
 
-```bash
-# Get the pod name
-APP_POD=$(kubectl get pod -l app=app-service -o jsonpath="{.items[0].metadata.name}")
-
-# Check environment variables
-kubectl describe pod $APP_POD | grep -A5 "Environment Variables"
-```
-
-Expected output: The output should reference `doda-app-release-configmap` and `doda-app-release-secret`.
-
-**2. Verify HostPath Volume Mount:**
-Demonstrates that the model-service mounts shared storage from the VirtualBox host (`/mnt/shared`).
-
-```bash
-# Get the pod name
-MODEL_POD=$(kubectl get pod -l app=model-service -o jsonpath="{.items[0].metadata.name}")
-
-# Check mounts
-kubectl describe pod $MODEL_POD | grep -A5 "Mounts"
-```
-
-Expected output: The output should show `/data/shared` mounted from `shared-data-volume`.
-
-#### Troubleshooting (macOS / Networking)
-
-If you are testing on macOS or a restricted network environment and cannot reach `doda-app.local` via the browser — even after updating `/etc/hosts` — this is likely due to VirtualBox Host-Only network routing specific to the host machine.
-
-**Fallback Verification Method:**
-To verify that the application and Helm chart are working correctly without relying on the Ingress network bridge, use Kubernetes port-forwarding:
-
-1. Run:
-
-   ```bash
-   kubectl port-forward svc/app-service 8080:80
-   ```
-
-   (Keep this terminal window open)
-
-2. Open your browser to: `http://localhost:8080`
-
-If the application loads successfully at `localhost:8080`, the Helm deployment is functioning correctly.
+#### HostPath Volume Mount
+1.  **Get the Model Service Pod Name:**
+    ```bash
+    MODEL_POD=$(kubectl get pod -l app=model-service -o jsonpath="{.items[0].metadata.name}")
+    ```
+2.  **Check for Volume Mounts:**
+    ```bash
+    kubectl describe pod $MODEL_POD | grep -A5 "Mounts:"
+    ```
+    *The output should show the `/data/shared` path is mounted from the `shared-data-volume`.*
 
 ---
-## Monitoring 
 
-### Installation Steps
+### Appendix: Local Development with Minikube & Troubleshooting
 
-1. **Start Minikube**
-```
-minikube start
-```
+If you are testing locally without the A2 cluster or are facing networking issues on macOS, you can use Minikube.
 
-(Optionally, on macOS use the Docker driver for more stable networking:)
-```
-minikube start --driver=docker
-```
+1.  **Setup Minikube:**
+    ```bash
+    # Start Minikube (use docker driver on macOS for better networking)
+    minikube start --driver=docker
 
-2. **Enable Ingress addon**
-```
-minikube addons enable ingress
-```
+    # Enable the ingress addon
+    minikube addons enable ingress
+    ```
+2.  **Follow the main installation steps above.**
 
-3. **Wait for Ingress controller to be ready**
-```
-kubectl get pods -n ingress-nginx -w
-```
-
-4. **Update Helm dependencies**
-```
-   cd helm/doda-app
-   helm dependency update
-```
-
-5. **Create an SMTP password secret**
-```
-kubectl create secret generic alertmanager-email-secret \
-  --from-literal=password="password" \
-  -n default
-
-```
-
-6. **Install the application** (first time)
-```
-   helm install doda-app . -f values.yaml
-```
-   
-   **Or upgrade** (if already installed)
-```
-   helm upgrade doda-app . -f values.yaml
-```
-
-7. **Verify deployment**
-```bash
-   kubectl get pods
-   kubectl get servicemonitor
-   kubectl get ingress
-   kubectl get prometheusrule
-```
-
-## Testing
-
-### On macOS with Minikube
-Due to Docker networking limitations, use minikube service:
-```bash
-minikube service -n ingress-nginx ingress-nginx-controller --url
-```
-
-### Use first URL (HTTP port) for testing:
-
-```
-curl -H "Host: doda-app.local" http://127.0.0.1:XXXXX
-curl -H "Host: metrics.doda-app.local" http://127.0.0.1:XXXXX/metrics
-```
-
-If everything is correct, both curls should return an answer.
-
-## Grafana dashboards
-
-The `doda-app` Helm chart deploys Grafana as a dependency and configures a Prometheus data source automatically. 
-
-#### How to access Grafana
-
-After deploying the chart, run:
-
-```bash
-kubectl port-forward svc/doda-app-grafana 3000:80 --namespace default
-```
-
-### Importing the dashboards
-
-Two dashboards are included in this repository under:
-```bash
-helm/doda-app/dashboards/
-```
-- ```bash dashboard-overview.json``` – overview of all application metrics
-- ```bash dashboard-a4.json``` – supports the A4 experiment analysis
-  
----
-
-Grafana is deployed as part of the kube-prometheus-stack Helm dependency.
-
-Two dashboards required for Assignment 3 are stored as JSON files in:
-
-```bash
-helm/doda-app/dashboards/
-```
-
-
-These files are automatically packaged into a ConfigMap during Helm installation:
-```bash
-
-grafana-custom-dashboards
-```
-
-This ConfigMap contains the label:
-```bash
-
-grafana_dashboard: "1"
-```
-
-The Grafana sidecar (included in the Prometheus Stack) automatically watches for ConfigMaps with this label and loads the dashboards on startup.
-
-**No manual dashboard import is required.**
-Grafana will automatically load all dashboards located in the `dashboards/` folder whenever the chart is installed or upgraded.
-
-Access Grafana by locating its ingress host:
-```bash
-kubectl get ingress
-```
+3.  **Test Connectivity (Minikube on macOS):**
+    Due to Docker networking, you must use `minikube service` to get a temporary URL.
+    ```bash
+    minikube service -n ingress-nginx ingress-nginx-controller --url
+    ```
+    Use the HTTP URL provided by the command to test with `curl`:
+    ```bash
+    # Replace the URL with the one from the previous command
+    curl -H "Host: doda-app.local" http://127.0.0.1:XXXXX
+    curl -H "Host: metrics.doda-app.local" http://127.0.0.1:XXXXX/metrics
+    ```
 
 
 
