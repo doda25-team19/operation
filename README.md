@@ -129,6 +129,11 @@ If the application loads successfully at `localhost:8080`, the Helm deployment i
 minikube start
 ```
 
+(Optionally, on macOS use the Docker driver for more stable networking:)
+```
+minikube start --driver=docker
+```
+
 2. **Enable Ingress addon**
 ```
 minikube addons enable ingress
@@ -210,6 +215,43 @@ helm/doda-app/dashboards/
 - ```bash dashboard-a4.json``` – supports the A4 experiment analysis
   
 ---
+
+
+
+## Assignment 3: Grafana & Dashboards
+
+Grafana is deployed as part of the kube-prometheus-stack Helm dependency.
+
+Two dashboards required for Assignment 3 are stored as JSON files in:
+
+```bash
+helm/doda-app/dashboards/
+```
+
+
+These files are automatically packaged into a ConfigMap during Helm installation:
+```bash
+
+grafana-custom-dashboards
+```
+
+This ConfigMap contains the label:
+```bash
+
+grafana_dashboard: "1"
+```
+
+The Grafana sidecar (included in the Prometheus Stack) automatically watches for ConfigMaps with this label and loads the dashboards on startup.
+
+**No manual dashboard import is required.**
+Grafana will automatically load all dashboards located in the `dashboards/` folder whenever the chart is installed or upgraded.
+
+Access Grafana by locating its ingress host:
+```bash
+kubectl get ingress
+```
+
+
 
 ## Assignment 2: Provisioning a Kubernetes Cluster
 We have implemented a fully automated provisioning setup using Vagrant and Ansible to deploy a Kubernetes cluster.
