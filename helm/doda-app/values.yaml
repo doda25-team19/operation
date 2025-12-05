@@ -1,23 +1,23 @@
 # Default values for the doda-app chart.
-
+  
 # Global setting for the Ingress hostname.
 hostname: "doda-app.local"
 metricsHostname: "metrics.doda-app.local"
-
+    
 # Settings for the App Service (frontend/api)
-appService:
+appService:   
   replicaCount: 1
   image: "ghcr.io/doda25-team19/app:latest"
   service:
     port: 8080
-
+          
 # Settings for the Model Service (backend)
 modelService:
   replicaCount: 1
   image: "ghcr.io/doda25-team19/model-service:latest"
   service:
-    port: 8081
-
+    port: 8081   
+    
 # This is for the private registry secret.
 # hardcoded now, later, this could also be a variable.
 imagePullSecrets:
@@ -28,19 +28,38 @@ imagePullSecrets:
 appConfig:
   someValue: "Hello from the ConfigMap!"
   anotherValue: "42"
-
+        
 # A generic Secret to demonstrate usage
 # The values must be base64 encoded.
 # "secret-sauce" -> c2VjcmV0LXNhdWNl
-# "super-secret" -> c3VwZXItc2VjcmV0
+# "super-secret" -> c3VwZX-Itc2VjcmV0
 appSecrets:
   username: "c2VjcmV0LXNhdWNl"
   password: "c3VwZXItc2VjcmV0"
-
+        
 # For mounting a shared folder into a pod
 sharedVolume:
   hostPath: "/mnt/shared"
   mountPath: "/data/shared"
+
+grafana:
+  enabled: true
+  adminUser: admin
+  adminPassword: admin
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          url: http://doda-app-kube-prometheus-s-prometheus.default.svc.cluster.local:9090
+          access: proxy
+          isDefault: true
 
 prometheus:
   enabled: true
@@ -48,6 +67,32 @@ prometheus:
     serviceMonitorSelector:
       matchLabels:
         app: doda-app
+    ruleSelector:
+      matchLabels:
+        app: doda-app
+        role: alert-rules
+
+alertmanager:
+  enabled: true
+  alertmanagerSpec:
+    secrets:
+      - alertmanager-email-secret
+
+  config:
+    global:
+      resolve_timeout: 5m
+      smtp_smarthost: "smtp.gmail.com:587"
+      smtp_from: "placeholder@example.com"
+      smtp_auth_username: "placeholder@example.com"
+      smtp_auth_password_file: "/etc/alertmanager/secrets/alertmanager-email-secret/password"
+
+    route:
+      receiver: "team-email"
+
+    receivers:
+      - name: "team-email"
+        email_configs:
+          - to: "placeholder@example.com"
 
 kube-prometheus-stack:
   grafana:
