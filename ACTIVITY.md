@@ -52,7 +52,10 @@ This week I implemented my dedicated parts for A3. I implemented alerting for th
 
 - Mikolaj: 
 
-- Jeroen: 
+- Jeroen: https://github.com/doda25-team19/app/pull/8
+This week I worked on A3. I implemented the application instrumentation. It exposes a /metrics endpoint that serves application metrics in the Prometheus text exposition format. 
+
+
     
 - Viktor: https://github.com/doda25-team19/operation/pull/15 This week I added Grafana to the Helm chart, configured it with the Prometheus datasource and created two ready to import dashboards stored as JSON files in the operations repo.
   
