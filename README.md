@@ -39,7 +39,15 @@ kubectl get pods -n ingress-nginx -w
    helm dependency update
 ```
 
-5. **Install the application** (first time)
+5. **Create an SMTP password secret**
+```
+kubectl create secret generic alertmanager-email-secret \
+  --from-literal=password="password" \
+  -n default
+
+```
+
+6. **Install the application** (first time)
 ```
    helm install doda-app . -f values.yaml
 ```
@@ -49,11 +57,12 @@ kubectl get pods -n ingress-nginx -w
    helm upgrade doda-app . -f values.yaml
 ```
 
-6. **Verify deployment**
+7. **Verify deployment**
 ```bash
    kubectl get pods
    kubectl get servicemonitor
    kubectl get ingress
+   kubectl get prometheusrule
 ```
 
 ## Testing
