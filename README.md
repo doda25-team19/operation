@@ -188,6 +188,27 @@ curl -H "Host: metrics.doda-app.local" http://127.0.0.1:XXXXX/metrics
 
 If everything is correct, both curls should return an answer.
 
+## Grafana dashboards
+
+The `doda-app` Helm chart deploys Grafana as a dependency and configures a Prometheus data source automatically. 
+
+#### How to access Grafana
+
+After deploying the chart, run:
+
+```bash
+kubectl port-forward svc/doda-app-grafana 3000:80 --namespace default
+```
+
+### Importing the dashboards
+
+Two dashboards are included in this repository under:
+```bash
+helm/doda-app/dashboards/
+```
+- ```bash dashboard-overview.json``` – overview of all application metrics
+- ```bash dashboard-a4.json``` – supports the A4 experiment analysis
+  
 ---
 
 ## Assignment 2: Provisioning a Kubernetes Cluster
