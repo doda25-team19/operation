@@ -43,7 +43,7 @@ This week I worked on A2/Steps 18–20, implementing the Ansible automation for 
    Additionally, I took care of steps 21-23 for A2, which set up the Nginx Ingress Controller, the Kubernetes Dashboard, and enabling Istio support
 
   ### Week Q2.4
-- Arda: 
+- Arda: https://github.com/doda25-team19/operation/pull/11 This week I created a Helm chart for deploying our application to Kubernetes, implementing a ConfigMap, Secret, and hostPath Volume.
 
 - Benas: 
 
