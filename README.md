@@ -14,6 +14,8 @@ The application consists of a microservices architecture:
 
 ---
 
+## Assignment 3: Grafana & Dashboards
+
 ### Application Deployment (Helm Chart)
 
 This repository contains a Helm chart `doda-app` that deploys the complete application stack (Frontend, Backend, Ingress).
@@ -215,10 +217,6 @@ helm/doda-app/dashboards/
 - ```bash dashboard-a4.json``` – supports the A4 experiment analysis
   
 ---
-
-
-
-## Assignment 3: Grafana & Dashboards
 
 Grafana is deployed as part of the kube-prometheus-stack Helm dependency.
 
