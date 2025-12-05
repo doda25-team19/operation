@@ -12,6 +12,67 @@ The application consists of a microservices architecture:
 - **Model Service:** [doda25-team19/model-service](https://github.com/doda25-team19/model-service)
 - **Lib Version:** [doda25-team19/lib-version](https://github.com/doda25-team19/lib-version)
 
+
+---
+## Monitoring 
+
+### Installation Steps
+
+1. **Start Minikube**
+```
+minikube start
+```
+
+2. **Enable Ingress addon**
+```
+minikube addons enable ingress
+```
+
+3. **Wait for Ingress controller to be ready**
+```
+kubectl get pods -n ingress-nginx -w
+```
+
+4. **Update Helm dependencies**
+```
+   cd helm/doda-app
+   helm dependency update
+```
+
+5. **Install the application** (first time)
+```
+   helm install doda-app . -f values.yaml
+```
+   
+   **Or upgrade** (if already installed)
+```
+   helm upgrade doda-app . -f values.yaml
+```
+
+6. **Verify deployment**
+```bash
+   kubectl get pods
+   kubectl get servicemonitor
+   kubectl get ingress
+```
+
+## Testing
+
+### On macOS with Minikube
+Due to Docker networking limitations, use minikube service:
+```bash
+minikube service -n ingress-nginx ingress-nginx-controller --url
+```
+
+### Use first URL (HTTP port) for testing:
+
+```
+curl -H "Host: doda-app.local" http://127.0.0.1:XXXXX
+curl -H "Host: metrics.doda-app.local" http://127.0.0.1:XXXXX/metrics
+```
+
+If everything is correct, both curls should return an answer.
+
 ---
 
 ## Assignment 2: Provisioning a Kubernetes Cluster
@@ -46,6 +107,19 @@ ansible-playbook -i inventory.cfg finalization.yml
 
 ### How to Access the Cluster
 
+**Required host entries**
+
+To access the application and the Kubernetes dashboard through the Nginx ingress controller you must add the following entries to your host machine’s hosts file.
+
+On macOS and Linux the file is at `/etc/hosts`
+
+```bash
+192.168.56.90  doda-app.local
+192.168.56.90  dashboard.local
+```
+
+These hostnames are used by the ingress rules deployed in the cluster.
+
 The `admin.conf` file (your cluster credentials) is automatically copied to your `operation` directory. To use `kubectl` from your host machine, you can either use the `--kubeconfig` flag or export the environment variable.
 
 **Option A (using a flag):**
@@ -64,60 +138,29 @@ kubectl get pods -A
 ---
 ### Post-Provisioning Steps
 
-#### Step 21: Deploy the Application
+After running `finalization.yml` the following components are installed and configured automatically
+- MetalLB
+- Nginx ingress controller
+- Kubernetes dashboard with an admin user and ingress
+- Istio using the demo profile
 
-1.  Apply the Kubernetes manifests for the model service. These are located in the `k8s` folder.
-    ```bash
-    # Run these commands from your host machine
-    kubectl apply -f k8s/model-service-deployment.yaml
-    kubectl apply -f k8s/model-service-ingress.yaml
-    ```
-2.  Verify the deployment:
-    ```bash
-    kubectl get deploy,svc,ingress
-    ```
-    The `model-service` should now be available inside the cluster at `app.local`.
+#### Deploy the Application
 
-#### Step 22: Install Kubernetes Dashboard
+The ingress controller is already installed automatically.
+To deploy the application services apply the manifests in the `k8s` folder.
 
-1.  Install the dashboard using Helm and our custom values:
-    ```bash
-    helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
-    helm repo update
-    helm install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
-      --namespace kubernetes-dashboard \
-      --create-namespace \
-      -f k8s/k8s-dashboard-values.yaml
-    ```
-2.  Create the admin user and expose the dashboard via Ingress:
-    ```bash
-    kubectl apply -f k8s/dashboard-admin-user.yaml
-    kubectl apply -f k8s/dashboard-ingress.yaml
-    ```
-3.  Add the following entry to your host machine's `hosts` file (`/etc/hosts` on macOS/Linux):
-    ```
-    192.168.56.90    dashboard.local
-    ```
-4.  Access the dashboard at `https://dashboard.local` and use the token from this command to log in:
-    ```bash
-    kubectl -n kubernetes-dashboard create token admin-user
-    ```
+```bash
+kubectl apply -f k8s/model-service-deployment.yaml
+kubectl apply -f k8s/model-service-service.yaml
+kubectl apply -f k8s/app-service-deployment.yaml
+kubectl apply -f k8s/app-service-service.yaml
+kubectl apply -f k8s/ingress.yaml
+```
 
-#### Step 23: Install Istio
-
-1.  Download and install Istio using the `demo` profile:
-    ```bash
-    curl -L https://istio.io/downloadIstio | sh -
-    cd istio-*
-    ./bin/istioctl install --set profile=demo -y
-    ```
-2.  Verify the installation. You should see pods and services for Istio running:
-    ```bash
-    kubectl get pods -n istio-system
-    kubectl get svc -n istio-system
-    ```
-
----
+To log in generate a token.
+```bash
+kubectl -n kubernetes-dashboard create token admin-user
+```
 
 ## Assignment 1: Containerization
 We have implemented subtasks F1, F2, F3, F6, F7, F8, F11.

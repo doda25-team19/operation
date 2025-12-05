@@ -1,0 +1,29 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-alerts
+  labels:
+    app: doda-app
+    role: alert-rules
+    release: {{ .Release.Name }}
+spec:
+  groups:
+    - name: doda-app.rules
+      rules:
+        - alert: HighRequestRate
+          expr: increase(doda_predictions_total[1m]) > 15
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High request rate detected"
+            description: "The application is receiving more than 15 requests per minute."
+
+        - alert: HighLatency
+          expr: (doda_prediction_duration_seconds_sum / doda_prediction_duration_seconds_count) > 1
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High latency detected"
+            description: "Average prediction time exceeded 1 second."
