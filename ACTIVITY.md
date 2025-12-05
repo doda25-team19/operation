@@ -45,7 +45,8 @@ This week I worked on A2/Steps 18–20, implementing the Ansible automation for 
   ### Week Q2.4
 - Arda: https://github.com/doda25-team19/operation/pull/11 This week I created a Helm chart for deploying our application to Kubernetes, implementing a ConfigMap, Secret, and hostPath Volume.
 
-- Benas: 
+- Benas: https://github.com/doda25-team19/operation/pull/14
+This week I implemented my dedicated parts for A3. I implemented alerting for the application by configuring Alertmanager in the Prometheus stack. I also added PrometheusRule alerts based on application metrics, and secured SMTP credentials using a Kubernetes Secret.
 
 - Miroslav:
 
