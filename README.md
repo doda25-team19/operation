@@ -16,99 +16,109 @@ The application consists of a microservices architecture:
 
 ### Application Deployment (Helm Chart)
 
-This repository contains a Helm chart doda-app that deploys the complete application stack (Frontend, Backend, Ingress).
+This repository contains a Helm chart `doda-app` that deploys the complete application stack (Frontend, Backend, Ingress).
 
 #### 1. Installation
 
 To install the application with default settings:
 
-bash
+```bash
 cd operation/helm/doda-app
 helm install doda-app-release .
-
+```
 
 To uninstall:
-bash
-helm uninstall doda-app-release
 
+```bash
+helm uninstall doda-app-release
+```
 
 #### 2. Configuration & Hostnames
 
-To support grading or custom environments, you can override default values in values.yaml.
+To support grading or custom environments, you can override default values in `values.yaml`.
 
-*Changing the Hostname (Required for Grading):*
+**Changing the Hostname (Required for Grading):**
 If you need to access the app via a different domain, override the hostname variable during installation:
 
-bash
+```bash
 helm install doda-app-release . --set hostname="my-grading-url.local"
+```
 
-
-*Resource Limits:*
-CPU and Memory limits are configured by default but can be adjusted in values.yaml under appService.resources if the target environment has limited resources.
+**Resource Limits:**
+CPU and Memory limits are configured by default but can be adjusted in `values.yaml` under `appService.resources` if the target environment has limited resources.
 
 #### 3. Accessing the Application
 
 The application is exposed via an Ingress Controller.
 
-1.  *Find the LoadBalancer IP:*
-    bash
-    kubectl get svc -n ingress-nginx
-    
-    *Copy the EXTERNAL-IP (e.g., 192.168.56.90).*
+1. **Find the LoadBalancer IP:**
 
-2.  *Update Local DNS:*
-    Add the IP and hostname to your local /etc/hosts file (on your host machine, not the VM):
-    
-    # Replace <EXTERNAL-IP> with the IP from step 1
-    <EXTERNAL-IP> doda-app.local
-    
+   ```bash
+   kubectl get svc -n ingress-nginx
+   ```
 
-3.  *Browse:* Open http://doda-app.local in your web browser.
+   Copy the `EXTERNAL-IP` (e.g., `192.168.56.90`).
+
+2. **Update Local DNS:**
+   Add the IP and hostname to your local `/etc/hosts` file (on your host machine, not the VM):
+
+   ```
+   # Replace <EXTERNAL-IP> with the IP from step 1
+   <EXTERNAL-IP> doda-app.local
+   ```
+
+3. **Browse:**
+   Open `http://doda-app.local` in your web browser.
 
 #### Verification of Assignment Requirements
 
 Run the following commands to verify that the *"Excellent"* grade criteria for Kubernetes Usage (A3) have been met.
 
-*1. Verify ConfigMap & Secret Injection:*
+**1. Verify ConfigMap & Secret Injection:**
 Demonstrates that the app-service consumes configuration and sensitive data via environment variables.
 
-bash
+```bash
 # Get the pod name
 APP_POD=$(kubectl get pod -l app=app-service -o jsonpath="{.items[0].metadata.name}")
 
 # Check environment variables
 kubectl describe pod $APP_POD | grep -A5 "Environment Variables"
+```
 
-Expected Output: The output should reference doda-app-release-configmap and doda-app-release-secret.
+Expected output: The output should reference `doda-app-release-configmap` and `doda-app-release-secret`.
 
-*2. Verify HostPath Volume Mount:*
-Demonstrates that the model-service mounts shared storage from the VirtualBox host (/mnt/shared).
+**2. Verify HostPath Volume Mount:**
+Demonstrates that the model-service mounts shared storage from the VirtualBox host (`/mnt/shared`).
 
-bash
+```bash
 # Get the pod name
 MODEL_POD=$(kubectl get pod -l app=model-service -o jsonpath="{.items[0].metadata.name}")
 
 # Check mounts
 kubectl describe pod $MODEL_POD | grep -A5 "Mounts"
+```
 
-Expected Output: The output should show /data/shared mounted from shared-data-volume.
+Expected output: The output should show `/data/shared` mounted from `shared-data-volume`.
 
 #### Troubleshooting (macOS / Networking)
 
-If you are testing on macOS or a restricted network environment and cannot reach doda-app.local via the browser—even after updating /etc/hosts—this is likely due to VirtualBox Host-Only network routing specific to the host machine.
+If you are testing on macOS or a restricted network environment and cannot reach `doda-app.local` via the browser — even after updating `/etc/hosts` — this is likely due to VirtualBox Host-Only network routing specific to the host machine.
 
-*Fallback Verification Method:*
+**Fallback Verification Method:**
 To verify that the application and Helm chart are working correctly without relying on the Ingress network bridge, use Kubernetes port-forwarding:
 
-1.  Run the following command in your terminal:
-    bash
-    kubectl port-forward svc/app-service 8080:80
-    
-    (Keep this terminal window open)
+1. Run:
 
-2.  Open your browser to: http://localhost:8080
+   ```bash
+   kubectl port-forward svc/app-service 8080:80
+   ```
 
-If the application loads successfully at localhost:8080, the Helm deployment is functioning correctly.
+   (Keep this terminal window open)
+
+2. Open your browser to: `http://localhost:8080`
+
+If the application loads successfully at `localhost:8080`, the Helm deployment is functioning correctly.
+
 ---
 ## Monitoring 
 
