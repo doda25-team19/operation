@@ -50,7 +50,8 @@ This week I implemented my dedicated parts for A3. I implemented alerting for th
 
 - Miroslav:
 
-- Mikolaj: 
+- Mikolaj: https://github.com/doda25-team19/operation/pull/16
+This week I worked on A3 dashboard automation. I implemented automatic Grafana dashboard provisioning using a ConfigMap and the Grafana sidecar, integrated dashboard loading into the Helm chart, and updated the chart configuration to merge Prometheus, Alertmanager, and Grafana settings.
 
 - Jeroen: https://github.com/doda25-team19/app/pull/8
 This week I worked on A3. I implemented the application instrumentation. It exposes a /metrics endpoint that serves application metrics in the Prometheus text exposition format. 
