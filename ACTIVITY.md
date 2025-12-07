@@ -48,9 +48,11 @@ This week I worked on A2/Steps 18–20, implementing the Ansible automation for 
 - Benas: https://github.com/doda25-team19/operation/pull/14
 This week I implemented my dedicated parts for A3. I implemented alerting for the application by configuring Alertmanager in the Prometheus stack. I also added PrometheusRule alerts based on application metrics, and secured SMTP credentials using a Kubernetes Secret.
 
-- Miroslav:
+- Miroslav: https://github.com/doda25-team19/operation/pull/13
+I worked on integrating Prometheus into our Helm chart by adding the prometheus stack as a dependency. Also created a service monitor to scrape the /metrics endpoints.
 
-- Mikolaj: 
+- Mikolaj: https://github.com/doda25-team19/operation/pull/16
+This week I worked on A3 dashboard automation. I implemented automatic Grafana dashboard provisioning using a ConfigMap and the Grafana sidecar, integrated dashboard loading into the Helm chart, and updated the chart configuration to merge Prometheus, Alertmanager, and Grafana settings.
 
 - Jeroen: https://github.com/doda25-team19/app/pull/8
 This week I worked on A3. I implemented the application instrumentation. It exposes a /metrics endpoint that serves application metrics in the Prometheus text exposition format. 

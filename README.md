@@ -11,6 +11,117 @@ Microservices application with:
 
 ---
 
+## Assignment 3: Application Deployment & Monitoring
+
+This section details how to deploy the application stack to Kubernetes using Helm and how to access the provisioned monitoring dashboards.
+
+### Prerequisites
+- A running Kubernetes cluster as provisioned in Assignment 2.
+- The `admin.conf` for your cluster is configured (e.g., via `export KUBECONFIG=$(pwd)/admin.conf`).
+
+### 1. Deploying the Application Stack
+
+The `doda-app` Helm chart will deploy the application, Prometheus (for metrics), and Grafana (for dashboards) in one step.
+
+1.  **Navigate to the Helm Chart Directory:**
+    ```bash
+    cd operation/helm/doda-app
+    ```
+
+2.  **Update Helm Dependencies:**
+    This command downloads the required dependency charts (like Grafana and Prometheus).
+    ```bash
+    helm dependency update
+    ```
+
+
+3.  **Create SMTP Secret (for Alertmanager):**
+    This secret is required by the Prometheus stack for sending alerts.
+    ```bash
+    kubectl create secret generic alertmanager-email-secret \
+      --from-literal=password="password" \
+      -n default
+    ```
+
+4.  **Install the Helm Chart:**
+    Use `helm install` for the first deployment.
+    ```bash
+    helm install doda-app-release . -f values.yaml
+    ```
+    *(If you need to update an existing deployment, use `helm upgrade` instead.)*
+
+### 2. Accessing the Services (Ingress)
+
+#### Accessing the Application
+
+1.  **Find the Ingress IP Address:**
+    Get the external IP address assigned to the Ingress Controller by MetalLB.
+    ```bash
+    kubectl get svc -n ingress-nginx
+    ```
+    *Look for the `EXTERNAL-IP` of the `ingress-nginx-controller` service (e.g., `192.168.56.90`).*
+
+2.  **Update Your Local `/etc/hosts` File:**
+    Add the following line to the `hosts` file on your host machine (not the VM).
+    ```
+    # Replace <EXTERNAL-IP> with the IP from the previous step
+    <EXTERNAL-IP> doda-app.local
+    ```
+
+3.  **Open in Browser:**
+    You can now access the application at **http://doda-app.local**.
+
+#### Accessing Grafana
+
+1.  **Forward the Grafana Port:**
+    The easiest way to access the Grafana UI is via port-forwarding.
+    ```bash
+    # This command will continue running. Keep the terminal open.
+    kubectl port-forward svc/doda-app-release-grafana 3000:80
+    ```
+
+2.  **Open in Browser:**
+    You can now access Grafana at **http://localhost:3000**.
+
+### 3. Monitoring with Prometheus & Grafana
+
+#### Automatic Dashboard Provisioning
+The Helm chart is configured to **automatically provision** the required Grafana dashboards. **No manual import is needed.**
+
+Two dashboards are included in the `helm/doda-app/dashboards/` directory:
+-   `dashboard-overview.json`: An overview of all application metrics.
+-   `dashboard-a4.json`: Supports the A4 experiment analysis.
+
+*Technical Note: During installation, these JSON files are packaged into a `ConfigMap` with the label `grafana_dashboard: "1"`. The Grafana sidecar automatically detects this label and loads the dashboards on startup.*
+
+### 4. Verifying "Excellent" Grade Criteria
+
+Run these commands to verify that the Kubernetes usage requirements have been met.
+
+#### ConfigMap & Secret Injection
+1.  **Get the App Pod Name:**
+    ```bash
+    APP_POD=$(kubectl get pod -l app=app-service -o jsonpath="{.items[0].metadata.name}")
+    ```
+2.  **Check for Injected Environment Variables:**
+    ```bash
+    kubectl describe pod $APP_POD | grep -A5 "Environment:"
+    ```
+    *The output should show environment variables mounted from `doda-app-release-configmap` and `doda-app-release-secret`.*
+
+#### HostPath Volume Mount
+1.  **Get the Model Service Pod Name:**
+    ```bash
+    MODEL_POD=$(kubectl get pod -l app=model-service -o jsonpath="{.items[0].metadata.name}")
+    ```
+2.  **Check for Volume Mounts:**
+    ```bash
+    kubectl describe pod $MODEL_POD | grep -A5 "Mounts:"
+    ```
+    *The output should show the `/data/shared` path is mounted from the `shared-data-volume`.*
+
+---
+
 ## Application Deployment (Helm Chart)
 
 ### Installation
@@ -61,6 +172,32 @@ kubectl get pods -n ingress-nginx -w  # Wait for ready
 
 cd helm/doda-app
 helm dependency update
+
+### Appendix: Local Development with Minikube & Troubleshooting
+
+If you are testing locally without the A2 cluster or are facing networking issues on macOS, you can use Minikube.
+
+1.  **Setup Minikube:**
+    ```bash
+    # Start Minikube (use docker driver on macOS for better networking)
+    minikube start --driver=docker
+
+    # Enable the ingress addon
+    minikube addons enable ingress
+    ```
+2.  **Follow the main installation steps above.**
+
+3.  **Test Connectivity (Minikube on macOS):**
+    Due to Docker networking, you must use `minikube service` to get a temporary URL.
+    ```bash
+    minikube service -n ingress-nginx ingress-nginx-controller --url
+    ```
+    Use the HTTP URL provided by the command to test with `curl`:
+    ```bash
+    # Replace the URL with the one from the previous command
+    curl -H "Host: doda-app.local" http://127.0.0.1:XXXXX
+    curl -H "Host: metrics.doda-app.local" http://127.0.0.1:XXXXX/metrics
+    ```
 
 # Create alertmanager secret
 kubectl create secret generic alertmanager-email-secret \
@@ -233,7 +370,6 @@ Then upgrade the Helm release.
 - **Cause:** Rate limit configuration too restrictive or misconfigured
 - **Solution:** Check values.yaml settings and ensure `burstSize` and `fillInterval` are reasonable
 
----
 
 ## Assignment 2: Provisioning a Kubernetes Cluster
 We have implemented a fully automated provisioning setup using Vagrant and Ansible to deploy a Kubernetes cluster.
