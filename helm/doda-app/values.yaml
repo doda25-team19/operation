@@ -104,3 +104,13 @@ kube-prometheus-stack:
         labelValue: "1"
         searchNamespace: default
 
+
+istio:
+  enabled: true
+  gateway:
+    # excellent criteria: configurable name
+    name: istio-ingressgateway
+    namespace: istio-system
+  virtualService:
+    hosts:
+      - "*"
