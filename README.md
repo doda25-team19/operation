@@ -1,182 +1,237 @@
 # DODA Project - Team 19
 
 ## Architecture
-The application consists of a microservices architecture:
-1.  **App (Frontend):** A web interface serving the UI.
-2.  **Model Service (Backend):** A Python-based service hosting the machine learning model.
-3.  **Lib-Version:** A shared Java library for version awareness used by the components.
+Microservices application with:
+- **App (Frontend):** Web UI
+- **Model Service (Backend):** Python ML prediction service
+- **Lib-Version:** Shared Java library for version awareness
 
 ## Repositories
-- **Operation:** [doda25-team19/operation](https://github.com/doda25-team19/operation)
-- **App:** [doda25-team19/app](https://github.com/doda25-team19/app)
-- **Model Service:** [doda25-team19/model-service](https://github.com/doda25-team19/model-service)
-- **Lib Version:** [doda25-team19/lib-version](https://github.com/doda25-team19/lib-version)
+- [Operation](https://github.com/doda25-team19/operation) | [App](https://github.com/doda25-team19/app) | [Model Service](https://github.com/doda25-team19/model-service) | [Lib Version](https://github.com/doda25-team19/lib-version)
 
 ---
 
-### Application Deployment (Helm Chart)
+## Application Deployment (Helm Chart)
 
-This repository contains a Helm chart doda-app that deploys the complete application stack (Frontend, Backend, Ingress).
+### Installation
 
-#### 1. Installation
-
-To install the application with default settings:
-
-bash
+```bash
 cd operation/helm/doda-app
-helm install doda-app-release .
+helm install doda-app-release .              # Install
+helm upgrade doda-app-release . -f values.yaml  # Upgrade
+helm uninstall doda-app-release              # Uninstall
+```
 
-
-To uninstall:
-bash
-helm uninstall doda-app-release
-
-
-#### 2. Configuration & Hostnames
-
-To support grading or custom environments, you can override default values in values.yaml.
-
-*Changing the Hostname (Required for Grading):*
-If you need to access the app via a different domain, override the hostname variable during installation:
-
-bash
+**Custom hostname for grading:**
+```bash
 helm install doda-app-release . --set hostname="my-grading-url.local"
+```
 
+### Accessing the Application
 
-*Resource Limits:*
-CPU and Memory limits are configured by default but can be adjusted in values.yaml under appService.resources if the target environment has limited resources.
+1. Get LoadBalancer IP: `kubectl get svc -n ingress-nginx`
+2. Add to `/etc/hosts`: `<EXTERNAL-IP> doda-app.local`
+3. Browse: http://doda-app.local
 
-#### 3. Accessing the Application
+**Fallback (port-forward):** `kubectl port-forward svc/app-service 8080:80` then access http://localhost:8080
 
-The application is exposed via an Ingress Controller.
+### Verification (Assignment A3)
 
-1.  *Find the LoadBalancer IP:*
-    bash
-    kubectl get svc -n ingress-nginx
-    
-    *Copy the EXTERNAL-IP (e.g., 192.168.56.90).*
-
-2.  *Update Local DNS:*
-    Add the IP and hostname to your local /etc/hosts file (on your host machine, not the VM):
-    
-    # Replace <EXTERNAL-IP> with the IP from step 1
-    <EXTERNAL-IP> doda-app.local
-    
-
-3.  *Browse:* Open http://doda-app.local in your web browser.
-
-#### Verification of Assignment Requirements
-
-Run the following commands to verify that the *"Excellent"* grade criteria for Kubernetes Usage (A3) have been met.
-
-*1. Verify ConfigMap & Secret Injection:*
-Demonstrates that the app-service consumes configuration and sensitive data via environment variables.
-
-bash
-# Get the pod name
+**ConfigMap & Secret Injection:**
+```bash
 APP_POD=$(kubectl get pod -l app=app-service -o jsonpath="{.items[0].metadata.name}")
-
-# Check environment variables
 kubectl describe pod $APP_POD | grep -A5 "Environment Variables"
+# Should show doda-app-release-configmap and doda-app-release-secret
+```
 
-Expected Output: The output should reference doda-app-release-configmap and doda-app-release-secret.
-
-*2. Verify HostPath Volume Mount:*
-Demonstrates that the model-service mounts shared storage from the VirtualBox host (/mnt/shared).
-
-bash
-# Get the pod name
+**HostPath Volume Mount:**
+```bash
 MODEL_POD=$(kubectl get pod -l app=model-service -o jsonpath="{.items[0].metadata.name}")
-
-# Check mounts
 kubectl describe pod $MODEL_POD | grep -A5 "Mounts"
-
-Expected Output: The output should show /data/shared mounted from shared-data-volume.
-
-#### Troubleshooting (macOS / Networking)
-
-If you are testing on macOS or a restricted network environment and cannot reach doda-app.local via the browser—even after updating /etc/hosts—this is likely due to VirtualBox Host-Only network routing specific to the host machine.
-
-*Fallback Verification Method:*
-To verify that the application and Helm chart are working correctly without relying on the Ingress network bridge, use Kubernetes port-forwarding:
-
-1.  Run the following command in your terminal:
-    bash
-    kubectl port-forward svc/app-service 8080:80
-    
-    (Keep this terminal window open)
-
-2.  Open your browser to: http://localhost:8080
-
-If the application loads successfully at localhost:8080, the Helm deployment is functioning correctly.
+# Should show /data/shared mounted from shared-data-volume
+```
 ---
-## Monitoring 
+## Monitoring
 
-### Installation Steps
-
-1. **Start Minikube**
-```
+### Setup (Minikube)
+```bash
 minikube start
-```
-
-2. **Enable Ingress addon**
-```
 minikube addons enable ingress
-```
+kubectl get pods -n ingress-nginx -w  # Wait for ready
 
-3. **Wait for Ingress controller to be ready**
-```
-kubectl get pods -n ingress-nginx -w
-```
+cd helm/doda-app
+helm dependency update
 
-4. **Update Helm dependencies**
-```
-   cd helm/doda-app
-   helm dependency update
-```
-
-5. **Create an SMTP password secret**
-```
+# Create alertmanager secret
 kubectl create secret generic alertmanager-email-secret \
-  --from-literal=password="password" \
-  -n default
+  --from-literal=password="password" -n default
 
-```
+# Install or upgrade
+helm install doda-app . -f values.yaml    # First time
+helm upgrade doda-app . -f values.yaml    # Update
 
-6. **Install the application** (first time)
-```
-   helm install doda-app . -f values.yaml
-```
-   
-   **Or upgrade** (if already installed)
-```
-   helm upgrade doda-app . -f values.yaml
+# Verify
+kubectl get pods,servicemonitor,ingress,prometheusrule
 ```
 
-7. **Verify deployment**
+### Testing (macOS/Minikube)
 ```bash
-   kubectl get pods
-   kubectl get servicemonitor
-   kubectl get ingress
-   kubectl get prometheusrule
-```
-
-## Testing
-
-### On macOS with Minikube
-Due to Docker networking limitations, use minikube service:
-```bash
+# Get minikube URL
 minikube service -n ingress-nginx ingress-nginx-controller --url
-```
 
-### Use first URL (HTTP port) for testing:
-
-```
+# Test with first URL (HTTP port)
 curl -H "Host: doda-app.local" http://127.0.0.1:XXXXX
 curl -H "Host: metrics.doda-app.local" http://127.0.0.1:XXXXX/metrics
 ```
 
-If everything is correct, both curls should return an answer.
+---
+
+## Istio Rate Limiting
+
+Per-IP rate limiting (5 req/min) on model-service using Istio EnvoyFilter with token bucket algorithm. Returns HTTP 429 when limit exceeded.
+
+### Verification
+
+```bash
+kubectl get pods  # Should show 2/2 containers (app + istio-proxy)
+kubectl get virtualservice,destinationrule,envoyfilter
+```
+
+### Testing Rate Limiting
+
+**Test 1: Basic Rate Limiting**
+
+Send 7 requests quickly to observe rate limiting in action:
+```bash
+for i in {1..7}; do
+  curl -X POST http://doda-app.local/predict \
+    -H "Content-Type: application/json" \
+    -d '{"sms":"test message"}' \
+    -w "\nStatus: %{http_code}\n"
+  sleep 1
+done
+```
+
+**Expected Result:**
+- Requests 1-5: HTTP 200 (success)
+- Requests 6-7: HTTP 429 (rate limited)
+
+**Test 2: Token Bucket Refill**
+
+Verify that rate limits reset after the fill interval:
+```bash
+# Hit the rate limit
+for i in {1..6}; do
+  curl -X POST http://doda-app.local/predict \
+    -H "Content-Type: application/json" \
+    -d '{"sms":"test"}' -s -o /dev/null
+done
+
+# Wait for token bucket to refill
+echo "Waiting 60 seconds for token refill..."
+sleep 60
+
+# Try again - should succeed
+curl -X POST http://doda-app.local/predict \
+  -H "Content-Type: application/json" \
+  -d '{"sms":"test message"}' \
+  -w "\nStatus: %{http_code}\n"
+```
+
+**Expected Result:** After 60 seconds, the request succeeds (HTTP 200)
+
+**Test 3: Per-IP Isolation**
+
+Different client IPs have independent quotas. If you have access to multiple machines or can use different source IPs, verify that rate limiting is isolated per IP.
+
+### Viewing Envoy Metrics
+
+Check Istio's rate limiting metrics from the Envoy proxy:
+```bash
+# Get the model-service pod name
+MODEL_POD=$(kubectl get pod -l app=model-service -o jsonpath="{.items[0].metadata.name}")
+
+# View rate limiting metrics
+kubectl exec -it $MODEL_POD -c istio-proxy -- \
+  curl localhost:15000/stats/prometheus | grep local_rate_limit
+```
+
+Look for metrics like:
+- `envoy_local_rate_limit_enabled`
+- `envoy_local_rate_limit_enforced`
+- `envoy_http_local_rate_limit_rate_limited`
+
+### Configuration
+
+Rate limiting settings are configurable in `values.yaml`:
+
+```yaml
+istio:
+  enabled: true  # Enable/disable Istio features
+  sidecarInjection:
+    enabled: true  # Enable sidecar injection
+  rateLimiting:
+    enabled: true  # Enable rate limiting
+    requestsPerMinute: 5  # Not used directly (kept for clarity)
+    burstSize: 5  # Maximum tokens in bucket
+    fillInterval: 60  # Token refill interval in seconds
+```
+
+**To adjust rate limits:**
+
+1. Edit `helm/doda-app/values.yaml`
+2. Modify `istio.rateLimiting.burstSize` (max requests) or `fillInterval` (refill period)
+3. Upgrade the Helm release:
+   ```bash
+   cd helm/doda-app
+   helm upgrade doda-app . -f values.yaml
+   ```
+4. Wait for pods to restart with updated configuration
+
+**Example:** To allow 10 requests per 2 minutes:
+```yaml
+istio:
+  rateLimiting:
+    burstSize: 10
+    fillInterval: 120
+```
+
+### Disabling Rate Limiting
+
+To disable rate limiting without removing Istio:
+```yaml
+istio:
+  rateLimiting:
+    enabled: false
+```
+
+To disable all Istio features:
+```yaml
+istio:
+  enabled: false
+  sidecarInjection:
+    enabled: false
+  rateLimiting:
+    enabled: false
+```
+
+Then upgrade the Helm release.
+
+### Troubleshooting
+
+**Issue:** Pods show 1/1 containers instead of 2/2
+- **Cause:** Istio sidecar injection is not working
+- **Solution:** Ensure Istio is installed: `kubectl get pods -n istio-system`
+- **Solution:** Check deployment annotations: `kubectl get deployment model-service -o yaml | grep sidecar.istio.io/inject`
+
+**Issue:** Rate limiting not working (all requests succeed)
+- **Cause:** EnvoyFilter not applied
+- **Solution:** Check if EnvoyFilter exists: `kubectl get envoyfilter`
+- **Solution:** Check Envoy configuration: `kubectl exec -it $MODEL_POD -c istio-proxy -- curl localhost:15000/config_dump | grep local_rate_limit`
+
+**Issue:** All requests return HTTP 429 immediately
+- **Cause:** Rate limit configuration too restrictive or misconfigured
+- **Solution:** Check values.yaml settings and ensure `burstSize` and `fillInterval` are reasonable
 
 ---
 
