@@ -1,0 +1,19 @@
+{{- if .Values.istio.enabled }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: model-service
+  namespace: {{ .Release.Namespace }}
+spec:
+  hosts:
+  - model-service
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: model-service
+        port:
+          number: 80
+{{- end }}

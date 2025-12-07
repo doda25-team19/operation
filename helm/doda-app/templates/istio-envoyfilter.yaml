@@ -1,0 +1,59 @@
+{{- if .Values.istio.rateLimiting.enabled }}
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: model-service-ratelimit
+  namespace: {{ .Release.Namespace }}
+spec:
+  workloadSelector:
+    labels:
+      app: model-service
+  configPatches:
+  # Patch 1: Add the HTTP local rate limit filter to the HTTP connection manager
+  - applyTo: HTTP_FILTER
+    match:
+      context: SIDECAR_INBOUND
+      listener:
+        filterChain:
+          filter:
+            name: "envoy.filters.network.http_connection_manager"
+            subFilter:
+              name: "envoy.filters.http.router"
+    patch:
+      operation: INSERT_BEFORE
+      value:
+        name: envoy.filters.http.local_ratelimit
+        typed_config:
+          "@type": type.googleapis.com/udpa.type.v1.TypedStruct
+          type_url: type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit
+          value:
+            stat_prefix: http_local_rate_limiter
+            token_bucket:
+              max_tokens: {{ .Values.istio.rateLimiting.burstSize }}
+              tokens_per_fill: {{ .Values.istio.rateLimiting.burstSize }}
+              fill_interval: {{ .Values.istio.rateLimiting.fillInterval }}s
+            filter_enabled:
+              runtime_key: local_rate_limit_enabled
+              default_value:
+                numerator: 100
+                denominator: HUNDRED
+            filter_enforced:
+              runtime_key: local_rate_limit_enforced
+              default_value:
+                numerator: 100
+                denominator: HUNDRED
+            response_headers_to_add:
+              - append: false
+                header:
+                  key: x-local-rate-limit
+                  value: 'true'
+            descriptors:
+              # Descriptor for IP-based rate limiting
+              - entries:
+                - key: remote_address
+                token_bucket:
+                  max_tokens: {{ .Values.istio.rateLimiting.burstSize }}
+                  tokens_per_fill: {{ .Values.istio.rateLimiting.burstSize }}
+                  fill_interval: {{ .Values.istio.rateLimiting.fillInterval }}s
+            enable_x_ratelimit_headers: DRAFT_VERSION_03
+{{- end }}

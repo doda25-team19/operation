@@ -42,6 +42,17 @@ sharedVolume:
   hostPath: "/mnt/shared"
   mountPath: "/data/shared"
 
+# Istio configuration for service mesh features
+istio:
+  enabled: true
+  sidecarInjection:
+    enabled: true
+  rateLimiting:
+    enabled: true
+    requestsPerMinute: 5
+    burstSize: 5
+    fillInterval: 60
+
 grafana:
   enabled: true
 

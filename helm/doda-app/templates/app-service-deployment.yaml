@@ -11,6 +11,8 @@ spec:
     metadata:
       labels:
         app: app-service
+      annotations:
+        sidecar.istio.io/inject: "true"
     spec:
       imagePullSecrets:
 {{ toYaml .Values.imagePullSecrets | nindent 8 }}
