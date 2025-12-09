@@ -18,7 +18,7 @@ spec:
 {{ toYaml .Values.imagePullSecrets | nindent 8 }}
       containers:
       - name: app-service
-        image: "{{ .Values.appService.image }}"   # FIXED
+        image: "{{ .Values.appService.image }}"
         ports:
         - containerPort: {{ .Values.appService.service.port }}
         env:

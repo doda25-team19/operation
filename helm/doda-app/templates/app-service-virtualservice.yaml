@@ -10,7 +10,7 @@ spec:
     {{- end }}
 
   gateways:
-    - {{ .Release.Name }}-gateway    # MUST MATCH gateway.metadata.name
+    - {{ .Release.Name }}-gateway
 
   http:
     - match:

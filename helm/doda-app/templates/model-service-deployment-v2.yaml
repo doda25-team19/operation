@@ -24,7 +24,7 @@ spec:
 
       containers:
         - name: model-service
-          image: "{{ .Values.modelService.image }}"  # <-- FIXED: you only have a single image
+          image: "{{ .Values.modelService.image }}"
           ports:
             - containerPort: {{ .Values.modelService.service.port }}
           volumeMounts:
