@@ -108,8 +108,7 @@ kube-prometheus-stack:
 istio:
   enabled: true
   gateway:
-    # excellent criteria: configurable name
-    name: istio-ingressgateway
+    name: ingressgateway
     namespace: istio-system
   virtualService:
     hosts:

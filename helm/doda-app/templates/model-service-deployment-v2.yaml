@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: model-service-v2
+spec:
+  replicas: {{ .Values.modelService.replicaCount }}
+  selector:
+    matchLabels:
+      app: model-service
+      version: v2-canary
+  template:
+    metadata:
+      labels:
+        app: model-service
+        version: v2-canary
+    spec:
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+
+      volumes:
+        - name: shared-data-volume
+          hostPath:
+            path: {{ .Values.sharedVolume.hostPath }}
+
+      containers:
+        - name: model-service
+          image: "{{ .Values.modelService.image }}"  # <-- FIXED: you only have a single image
+          ports:
+            - containerPort: {{ .Values.modelService.service.port }}
+          volumeMounts:
+            - name: shared-data-volume
+              mountPath: {{ .Values.sharedVolume.mountPath }}
