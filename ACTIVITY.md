@@ -42,7 +42,7 @@ This week I worked on A2/Steps 18–20, implementing the Ansible automation for 
    This week was a bit lighter in terms of development for A1, as in luck of the draw, I did not have to implement anything from a1, as there were only 5 parts, so I took the initiative to look at all a1 PRs.
    Additionally, I took care of steps 21-23 for A2, which set up the Nginx Ingress Controller, the Kubernetes Dashboard, and enabling Istio support
 
-  ### Week Q2.4
+### Week Q2.4
 - Arda: https://github.com/doda25-team19/operation/pull/11 This week I created a Helm chart for deploying our application to Kubernetes, implementing a ConfigMap, Secret, and hostPath Volume.
 
 - Benas: https://github.com/doda25-team19/operation/pull/14
@@ -61,3 +61,6 @@ This week I worked on A3. I implemented the application instrumentation. It expo
     
 - Viktor: https://github.com/doda25-team19/operation/pull/15 This week I added Grafana to the Helm chart, configured it with the Prometheus datasource and created two ready to import dashboards stored as JSON files in the operations repo.
   
+### Week Q2.5
+- Jeroen: https://github.com/doda25-team19/operation/pull/18
+Implemented Istio rate limiting (5 req/min per connection) for model-service using EnvoyFilter and added sidecar injection to all deployments.
