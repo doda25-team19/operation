@@ -38,7 +38,7 @@ This week I worked on A2/Steps 18–20, implementing the Ansible automation for 
     This week I worked on A2. I completed Step 1 and 2. created vm with vagrant. Dual configuration for ARM and INTEL architecture. Added network configuration to access the vm from host machine.
     - https://github.com/doda25-team19/app/pull/6 -
     This week I worked on A1/F5Add explicit clean up of apt cache in dockerfiles to reduce image size. The multistage build was already implemented.
-- Viktor:
+- Viktor: https://github.com/doda25-team19/operation/pull/10
    This week was a bit lighter in terms of development for A1, as in luck of the draw, I did not have to implement anything from a1, as there were only 5 parts, so I took the initiative to look at all a1 PRs.
    Additionally, I took care of steps 21-23 for A2, which set up the Nginx Ingress Controller, the Kubernetes Dashboard, and enabling Istio support
 

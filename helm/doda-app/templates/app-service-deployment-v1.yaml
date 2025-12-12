@@ -1,16 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: app-service
+  name: app-service-v1
 spec:
   replicas: {{ .Values.appService.replicaCount }}
   selector:
     matchLabels:
       app: app-service
+      version: v1-stable
   template:
     metadata:
       labels:
         app: app-service
+        version: v1-stable
       annotations:
         sidecar.istio.io/inject: "true"
     spec:
