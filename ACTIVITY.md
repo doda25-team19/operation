@@ -61,3 +61,7 @@ This week I worked on A3. I implemented the application instrumentation. It expo
     
 - Viktor: https://github.com/doda25-team19/operation/pull/15 This week I added Grafana to the Helm chart, configured it with the Prometheus datasource and created two ready to import dashboards stored as JSON files in the operations repo.
   
+### Week Q2.5
+
+- Miroslav: https://github.com/doda25-team19/operation/pull/20
+This week I was given the task to introduce sticky sessions, the PR is draft since I don't have it yet.
