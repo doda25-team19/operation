@@ -64,3 +64,6 @@ This week I worked on A3. I implemented the application instrumentation. It expo
 ### Week Q2.5
 - Jeroen: https://github.com/doda25-team19/operation/pull/18
 Implemented Istio rate limiting (5 req/min per connection) for model-service using EnvoyFilter and added sidecar injection to all deployments.
+
+- Mikolaj: https://github.com/doda25-team19/operation/pull/17
+This week I implemented the Gateway and VirtualService resources in the Helm chart to route traffic to the app-service and updated values.yaml to make the ingress gateway name fully configurable.
