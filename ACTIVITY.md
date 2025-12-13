@@ -67,3 +67,6 @@ Implemented Istio rate limiting (5 req/min per connection) for model-service usi
 
 - Mikolaj: https://github.com/doda25-team19/operation/pull/17
 This week I implemented the Gateway and VirtualService resources in the Helm chart to route traffic to the app-service and updated values.yaml to make the ingress gateway name fully configurable.
+
+- Viktor: https://github.com/doda25-team19/app/pull/10 https://github.com/doda25-team19/operation/pull/21
+  Worked on implementing the different versions experiment to compare the stable and canary versions of the app service
