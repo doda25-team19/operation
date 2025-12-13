@@ -16,8 +16,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (result) (rate(doda_predictions_total[5m]))",
-          "legendFormat": "{{result}}"
+          "expr": "sum by (version, result) (rate(doda_predictions_total[5m]))",
+          "legendFormat": "{{version}} {{result}}"
         }
       ]
     },
@@ -29,8 +29,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(rate(doda_prediction_duration_seconds_bucket[5m])) by (le)",
-          "legendFormat": "{{le}}"
+          "expr": "sum(rate(doda_prediction_duration_seconds_bucket[5m])) by (le, version)",
+          "legendFormat": "{{version}} {{le}}"
         }
       ]
     },
@@ -42,13 +42,13 @@
       "targets": [
         {
           "refId": "P50",
-          "expr": "histogram_quantile(0.5, sum(rate(doda_prediction_duration_seconds_bucket[5m])) by (le))",
-          "legendFormat": "p50"
+          "expr": "histogram_quantile(0.5, sum(rate(doda_prediction_duration_seconds_bucket[5m])) by (le, version))",
+          "legendFormat": "p50 {{version}}"
         },
         {
           "refId": "P90",
-          "expr": "histogram_quantile(0.9, sum(rate(doda_prediction_duration_seconds_bucket[5m])) by (le))",
-          "legendFormat": "p90"
+          "expr": "histogram_quantile(0.9, sum(rate(doda_prediction_duration_seconds_bucket[5m])) by (le, version))",
+          "legendFormat": "p90 {{version}}"
         }
       ]
     }

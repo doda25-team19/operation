@@ -10,6 +10,8 @@ appService:
   image: "ghcr.io/doda25-team19/app:latest"
   service:
     port: 8080
+  imageStable: "ghcr.io/doda25-team19/app:old"
+  imageCanary: "ghcr.io/doda25-team19/app:new"
           
 # Settings for the Model Service (backend)
 modelService:
