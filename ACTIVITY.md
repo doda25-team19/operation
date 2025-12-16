@@ -70,3 +70,6 @@ This week I implemented the Gateway and VirtualService resources in the Helm cha
 
 - Viktor: https://github.com/doda25-team19/app/pull/10 https://github.com/doda25-team19/operation/pull/21
   Worked on implementing the different versions experiment to compare the stable and canary versions of the app service
+
+- Benas: https://github.com/doda25-team19/operation/pull/19
+This week, I implemented my dedicated parts for A4. I added 2 deployment versions for app-service and model-service, DestinationRule with subsets, and virtualservice with 90/10 routing.
