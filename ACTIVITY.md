@@ -73,3 +73,10 @@ This week I implemented the Gateway and VirtualService resources in the Helm cha
 
 - Benas: https://github.com/doda25-team19/operation/pull/19
 This week, I implemented my dedicated parts for A4. I added 2 deployment versions for app-service and model-service, DestinationRule with subsets, and virtualservice with 90/10 routing.
+
+- Arda: https://github.com/doda25-team19/operation/pull/22
+Researched Automated Canary Analysis (ACA) and Flagger to address manual verification shortcomings. Drafted the Extension Proposal docs/extension.md to fulfill the Release Engineering extension requirement.
+
+### Week Q2.6
+- Arda: https://github.com/doda25-team19/operation/pull/23
+Finalized the project documentation. Created docs/deployment.md with Mermaid diagrams visualizing the Istio Traffic Flow and the 90/10 Canary split strategy.
