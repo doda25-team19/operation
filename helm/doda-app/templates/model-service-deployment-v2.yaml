@@ -25,7 +25,10 @@ spec:
       containers:
         - name: model-service
           image: "{{ .Values.modelService.image }}"
-          ports:
+        env:
+        - name: MODEL_FILE
+          value: "output/model.joblib"
+        ports:
             - containerPort: {{ .Values.modelService.service.port }}
           volumeMounts:
             - name: shared-data-volume
