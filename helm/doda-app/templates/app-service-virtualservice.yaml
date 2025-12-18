@@ -13,23 +13,19 @@ spec:
     - {{ .Release.Name }}-gateway
 
   http:
-    # Simple canary route for testing
-    - match:
-        - headers:
-            x-user-id:
-              exact: "user-canary"
-      route:
-        - destination:
-            host: app-service
-            subset: canary
-            port:
-              number: {{ .Values.appService.service.port }}
-    
-    # Default: everyone else goes to stable
+    # 90/10 canary split with sticky sessions
+    # The consistentHash in DestinationRule ensures users stick to their assigned version
     - route:
         - destination:
             host: app-service
             subset: stable
             port:
               number: {{ .Values.appService.service.port }}
+          weight: 90
+        - destination:
+            host: app-service
+            subset: canary
+            port:
+              number: {{ .Values.appService.service.port }}
+          weight: 10
 {{- end }}

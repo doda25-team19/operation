@@ -1,24 +1,26 @@
 {{- if .Values.istio.enabled }}
-apiVersion: networking.istio.io/v1alpha3
+apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
   name: model-service-virtualservice
 spec:
   hosts:
     - model-service
+  
   http:
-    # Route for canary callers (app-service v2 → model-service v2)
-    - match:
-        - sourceLabels:
-            version: v2-canary
-      route:
-        - destination:
-            host: model-service
-            subset: canary
-
-    # Default: stable callers (app-service v1 → model-service v1)
+    # 90/10 split matching the app-service routing
+    # The consistentHash ensures the same user gets routed to matching versions
     - route:
         - destination:
             host: model-service
             subset: stable
+            port:
+              number: {{ .Values.modelService.service.port }}
+          weight: 90
+        - destination:
+            host: model-service
+            subset: canary
+            port:
+              number: {{ .Values.modelService.service.port }}
+          weight: 10
 {{- end }}

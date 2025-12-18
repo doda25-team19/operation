@@ -9,7 +9,8 @@ appService:
   replicaCount: 1
   image: "ghcr.io/doda25-team19/app:latest"
   service:
-    port: 8080
+    port: 80
+    targetPort: 8080
           
 # Settings for the Model Service (backend)
 modelService:
@@ -35,6 +36,10 @@ appSecrets:
 sharedVolume:
   hostPath: "/mnt/shared"
   mountPath: "/data/shared"
+
+# flag or nginx to not interfere with istio
+nginx:
+  enabled: false
 
 grafana:
   enabled: true
