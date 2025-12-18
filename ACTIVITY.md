@@ -42,7 +42,7 @@ This week I worked on A2/Steps 18–20, implementing the Ansible automation for 
    This week was a bit lighter in terms of development for A1, as in luck of the draw, I did not have to implement anything from a1, as there were only 5 parts, so I took the initiative to look at all a1 PRs.
    Additionally, I took care of steps 21-23 for A2, which set up the Nginx Ingress Controller, the Kubernetes Dashboard, and enabling Istio support
 
-  ### Week Q2.4
+### Week Q2.4
 - Arda: https://github.com/doda25-team19/operation/pull/11 This week I created a Helm chart for deploying our application to Kubernetes, implementing a ConfigMap, Secret, and hostPath Volume.
 
 - Benas: https://github.com/doda25-team19/operation/pull/14
@@ -62,6 +62,25 @@ This week I worked on A3. I implemented the application instrumentation. It expo
 - Viktor: https://github.com/doda25-team19/operation/pull/15 This week I added Grafana to the Helm chart, configured it with the Prometheus datasource and created two ready to import dashboards stored as JSON files in the operations repo.
   
 ### Week Q2.5
+- Jeroen: https://github.com/doda25-team19/operation/pull/18
+Implemented Istio rate limiting (5 req/min per connection) for model-service using EnvoyFilter and added sidecar injection to all deployments.
+
+- Mikolaj: https://github.com/doda25-team19/operation/pull/17
+This week I implemented the Gateway and VirtualService resources in the Helm chart to route traffic to the app-service and updated values.yaml to make the ingress gateway name fully configurable.
+
+- Viktor: https://github.com/doda25-team19/app/pull/10 https://github.com/doda25-team19/operation/pull/21
+  Worked on implementing the different versions experiment to compare the stable and canary versions of the app service
+
+- Benas: https://github.com/doda25-team19/operation/pull/19
+This week, I implemented my dedicated parts for A4. I added 2 deployment versions for app-service and model-service, DestinationRule with subsets, and virtualservice with 90/10 routing.
+
+- Arda: https://github.com/doda25-team19/operation/pull/22
+Researched Automated Canary Analysis (ACA) and Flagger to address manual verification shortcomings. Drafted the Extension Proposal docs/extension.md to fulfill the Release Engineering extension requirement.
 
 - Miroslav: https://github.com/doda25-team19/operation/pull/20
-This week I was given the task to introduce sticky sessions, the PR is draft since I don't have it yet.
+This week I was given the task to introduce sticky sessions, the PR is draft since I don't have it yet. (wrapped up in week 6)
+
+### Week Q2.6
+- Arda: https://github.com/doda25-team19/operation/pull/23
+Finalized the project documentation. Created docs/deployment.md with Mermaid diagrams visualizing the Istio Traffic Flow and the 90/10 Canary split strategy.
+
