@@ -2,34 +2,38 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: model-service-v1
+  labels:
+    app: model-service
+    version: v1
 spec:
   replicas: {{ .Values.modelService.replicaCount }}
   selector:
     matchLabels:
       app: model-service
-      version: v1-stable
+      version: v1
   template:
     metadata:
       labels:
         app: model-service
-        version: v1-stable
+        version: v1
     spec:
       imagePullSecrets:
-        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
-
+{{ toYaml .Values.imagePullSecrets | nindent 8 }}
       volumes:
         - name: shared-data-volume
           hostPath:
             path: {{ .Values.sharedVolume.hostPath }}
-
       containers:
         - name: model-service
           image: "{{ .Values.modelService.image }}"
-        env:
-        - name: MODEL_FILE
-          value: "output/model.joblib"
-        ports:
-            - containerPort: {{ .Values.modelService.service.port }}
+          imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
+          env:
+            - name: MODEL_FILE
+              value: "output/model.joblib"
+          ports:
+            - name: http
+              containerPort: {{ .Values.modelService.service.port }}
+              protocol: TCP
           volumeMounts:
             - name: shared-data-volume
               mountPath: {{ .Values.sharedVolume.mountPath }}
