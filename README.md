@@ -14,6 +14,10 @@ The application consists of a microservices architecture:
 
 ---
 
+## Project Documentation
+*   [Final Deployment Architecture](docs/deployment.md) - Overview of Istio traffic flow and system components.
+*   [Extension Proposal](docs/extension.md) - Proposal for Automated Canary Analysis.
+
 ## Assignment 3: Application Deployment & Monitoring
 
 This section details how to deploy the application stack to Kubernetes using Helm and how to access the provisioned monitoring dashboards.
