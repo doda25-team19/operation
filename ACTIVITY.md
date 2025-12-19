@@ -80,3 +80,6 @@ Researched Automated Canary Analysis (ACA) and Flagger to address manual verific
 ### Week Q2.6
 - Arda: https://github.com/doda25-team19/operation/pull/23
 Finalized the project documentation. Created docs/deployment.md with Mermaid diagrams visualizing the Istio Traffic Flow and the 90/10 Canary split strategy.
+
+- Mikolaj: https://github.com/doda25-team19/model-service/pull/4 https://github.com/doda25-team19/operation/pull/24
+Finalized A1/F10 - No hard-coded model. Implemented environment variable logic for model loading in the backend and updated the Helm chart to inject this configuration into the deployments.
