@@ -83,3 +83,6 @@ Finalized the project documentation. Created docs/deployment.md with Mermaid dia
 
 - Mikolaj: https://github.com/doda25-team19/model-service/pull/4 https://github.com/doda25-team19/operation/pull/24
 Finalized A1/F10 - No hard-coded model. Implemented environment variable logic for model loading in the backend and updated the Helm chart to inject this configuration into the deployments.
+
+- Viktor: https://github.com/doda25-team19/operation/pull/25
+Worked on the experiment docs for A4, had to fix the values.yaml to use correct images for both versions and include the prerelease hosting. Also created a new virtual-service-prerelease.yaml
