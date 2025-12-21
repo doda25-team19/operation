@@ -13,7 +13,11 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    {{- range .Values.istio.virtualService.hosts }}
-    - {{ . | quote }}
-    {{- end }}
+      - {{ .Values.hostname | quote }}
+      {{- if .Values.prereleaseHostname }}
+      - {{ .Values.prereleaseHostname | quote }}
+      {{- end }}
+      {{- if .Values.metricsHostname }}
+      - {{ .Values.metricsHostname | quote }}
+      {{- end }}
 {{- end }}
