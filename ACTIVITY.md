@@ -90,6 +90,8 @@ Finalized A1/F10 - No hard-coded model. Implemented environment variable logic f
 - Viktor: https://github.com/doda25-team19/operation/pull/25
 Worked on the experiment docs for A4, had to fix the values.yaml to use correct images for both versions and include the prerelease hosting. Also created a new virtual-service-prerelease.yaml
 
+- Jeroen: this week I was sick (food poisoning) and couldn't contribute.
+
 - Miroslav: https://github.com/doda25-team19/operation/pull/20
 I managed to wrap up the PR from last week; there was a bug with the istio and nginx that were fighting for the same port and it took quite some digging to see the issue.
 
@@ -107,3 +109,14 @@ Tested the model release workflow since I didn't manage to do it previously. It 
 This week, I implemented A1-F4: adding multi-architecture support for amd64 and arm64.
 
 - Viktor: https://github.com/doda25-team19/operation/pull/28 worked on the experiment and the dashboards
+
+- Miroslav: https://github.com/doda25-team19/model-service/pull/5
+Tested the model release workflow since I didn't manage to do it previously. It turned out to be fine, so no changes on that. Added documentation for the model training and releasing as well as how to test the model.
+
+- Benas: https://github.com/doda25-team19/app/pull/12 https://github.com/doda25-team19/model-service/pull/6
+This week, I implemented A1-F4: adding multi-architecture support for amd64 and arm64.
+
+- Viktor: https://github.com/doda25-team19/operation/pull/28 worked on the experiment and the dashboards
+
+- Jeroen: https://github.com/doda25-team19/app/pull/11
+This week I worked on A3 Application Instrumentation enhancements. I added Spring Boot Actuator and Micrometer Prometheus integration to expose custom Counter and Gauge metrics via the /actuator/prometheus endpoint. The application now tracks prediction success/error counters and input text length as a gauge, ensuring proper Prometheus scraping and resolving the "Whitelabel error page" issue with the metrics endpoint.
