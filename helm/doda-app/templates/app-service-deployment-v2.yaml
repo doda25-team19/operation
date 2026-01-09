@@ -23,7 +23,7 @@ spec:
         - containerPort: {{ .Values.appService.service.port }}
         env:
         - name: MODEL_SERVICE_URL
-          value: "http://model-service:80"
+          value: {{ .Values.appService.modelServiceUrl | quote }}
         envFrom:
         - configMapRef:
             name: {{ .Release.Name }}-configmap
