@@ -86,3 +86,7 @@ Finalized A1/F10 - No hard-coded model. Implemented environment variable logic f
 
 - Viktor: https://github.com/doda25-team19/operation/pull/25
 Worked on the experiment docs for A4, had to fix the values.yaml to use correct images for both versions and include the prerelease hosting. Also created a new virtual-service-prerelease.yaml
+
+### Week Q2.7
+- Arda: https://github.com/doda25-team19/operation/pull/26
+Added the Extension Proposal (A4) regarding Automated Canary Analysis with Flagger. Refactored the Helm Chart (A3) to externalize the Model Service URL in `values.yaml` for better configurability.
