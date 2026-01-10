@@ -67,3 +67,29 @@ Implemented Istio rate limiting (5 req/min per connection) for model-service usi
 
 - Mikolaj: https://github.com/doda25-team19/operation/pull/17
 This week I implemented the Gateway and VirtualService resources in the Helm chart to route traffic to the app-service and updated values.yaml to make the ingress gateway name fully configurable.
+
+- Viktor: https://github.com/doda25-team19/app/pull/10 https://github.com/doda25-team19/operation/pull/21
+  Worked on implementing the different versions experiment to compare the stable and canary versions of the app service
+
+- Benas: https://github.com/doda25-team19/operation/pull/19
+This week, I implemented my dedicated parts for A4. I added 2 deployment versions for app-service and model-service, DestinationRule with subsets, and virtualservice with 90/10 routing.
+
+- Arda: https://github.com/doda25-team19/operation/pull/22
+Researched Automated Canary Analysis (ACA) and Flagger to address manual verification shortcomings. Drafted the Extension Proposal docs/extension.md to fulfill the Release Engineering extension requirement.
+
+### Week Q2.6
+- Arda: https://github.com/doda25-team19/operation/pull/23
+Finalized the project documentation. Created docs/deployment.md with Mermaid diagrams visualizing the Istio Traffic Flow and the 90/10 Canary split strategy.
+
+- Mikolaj: https://github.com/doda25-team19/model-service/pull/4 https://github.com/doda25-team19/operation/pull/24
+Finalized A1/F10 - No hard-coded model. Implemented environment variable logic for model loading in the backend and updated the Helm chart to inject this configuration into the deployments.
+
+- Viktor: https://github.com/doda25-team19/operation/pull/25
+Worked on the experiment docs for A4, had to fix the values.yaml to use correct images for both versions and include the prerelease hosting. Also created a new virtual-service-prerelease.yaml
+
+### Week Q2.7
+- Arda: https://github.com/doda25-team19/operation/pull/26
+Added the Extension Proposal (A4) regarding Automated Canary Analysis with Flagger. Refactored the Helm Chart (A3) to externalize the Model Service URL in `values.yaml` for better configurability.
+
+- Mikolaj: https://github.com/doda25-team19/operation/pull/27
+Added Kubernetes resource requests and limits for the model-service deployments, which prevents resource contention in the cluster, improving overall application stability.
