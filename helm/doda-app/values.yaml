@@ -43,12 +43,15 @@ sharedVolume:
 istio:
   enabled: true
   sidecarInjection:
-    enabled: true
+    enabled: false
   rateLimiting:
     enabled: true
     requestsPerMinute: 5
     burstSize: 5
     fillInterval: 60
+  gateway:
+    name: ingressgateway
+    namespace: istio-system
 
 grafana:
   enabled: true
@@ -117,10 +120,3 @@ kube-prometheus-stack:
         label: grafana_dashboard
         labelValue: "1"
         searchNamespace: default
-
-
-istio:
-  enabled: true
-  gateway:
-    name: ingressgateway
-    namespace: istio-system
