@@ -2,52 +2,52 @@
   "id": null,
   "uid": "doda-a4",
   "title": "DODA A4 experiment",
-  "tags": ["doda", "experiment"],
+  "tags": ["doda", "a4", "experiment"],
   "timezone": "browser",
   "schemaVersion": 37,
-  "version": 1,
+  "version": 2,
   "refresh": "10s",
   "panels": [
     {
       "id": 1,
-      "title": "Prediction success and error rate",
-      "type": "barchart",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "title": "Requests by result and version",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (version, result) (rate(doda_predictions_total[5m]))",
+          "expr": "sum by (version, result) (rate(doda_predictions_total[$__rate_interval]))",
           "legendFormat": "{{version}} {{result}}"
         }
       ]
     },
     {
       "id": 2,
-      "title": "Latency distribution",
-      "type": "heatmap",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "title": "Latency histogram buckets by version",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(rate(doda_prediction_duration_seconds_bucket[5m])) by (le, version)",
+          "expr": "sum(rate(doda_prediction_duration_seconds_bucket[$__rate_interval])) by (le, version)",
           "legendFormat": "{{version}} {{le}}"
         }
       ]
     },
     {
       "id": 3,
-      "title": "Latency quantiles during experiment",
+      "title": "Latency quantiles by version",
       "type": "timeseries",
-      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 8 },
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 16 },
       "targets": [
         {
           "refId": "P50",
-          "expr": "histogram_quantile(0.5, sum(rate(doda_prediction_duration_seconds_bucket[5m])) by (le, version))",
+          "expr": "histogram_quantile(0.5, sum(rate(doda_prediction_duration_seconds_bucket[$__rate_interval])) by (le, version))",
           "legendFormat": "p50 {{version}}"
         },
         {
           "refId": "P90",
-          "expr": "histogram_quantile(0.9, sum(rate(doda_prediction_duration_seconds_bucket[5m])) by (le, version))",
+          "expr": "histogram_quantile(0.9, sum(rate(doda_prediction_duration_seconds_bucket[$__rate_interval])) by (le, version))",
           "legendFormat": "p90 {{version}}"
         }
       ]
