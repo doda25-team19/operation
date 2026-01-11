@@ -103,3 +103,6 @@ Added Kubernetes resource requests and limits for the model-service deployments,
 - Miroslav: https://github.com/doda25-team19/model-service/pull/5
 Tested the model release workflow since I didn't manage to do it previously. It turned out to be fine, so no changes on that. Added documentation for the model training and releasing as well as how to test the model.
 
+- Benas: https://github.com/doda25-team19/app/pull/12 https://github.com/doda25-team19/model-service/pull/6
+This week, I implemented A1-F4: adding multi-architecture support for amd64 and arm64.
+
