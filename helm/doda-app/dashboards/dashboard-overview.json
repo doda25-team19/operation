@@ -2,63 +2,57 @@
   "id": null,
   "uid": "doda-overview",
   "title": "DODA overview",
-  "tags": ["doda"],
+  "tags": ["doda", "overview"],
   "timezone": "browser",
   "schemaVersion": 37,
-  "version": 1,
+  "version": 2,
   "refresh": "10s",
   "panels": [
     {
       "id": 1,
-      "title": "Predictions per result",
+      "title": "Requests by result",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (result) (rate(doda_predictions_total[5m]))",
+          "expr": "sum by (result) (rate(doda_predictions_total[$__rate_interval]))",
           "legendFormat": "{{result}}"
         }
       ]
     },
     {
       "id": 2,
-      "title": "Current input text length",
-      "type": "gauge",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "title": "Error ratio",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
       "targets": [
         {
           "refId": "A",
-          "expr": "doda_input_text_length",
-          "legendFormat": "length"
+          "expr": "sum(rate(doda_predictions_total{result=\"error\"}[$__rate_interval])) / sum(rate(doda_predictions_total[$__rate_interval]))",
+          "legendFormat": "error ratio"
         }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "min": 0
-        },
-        "overrides": []
-      }
+      ]
     },
     {
       "id": 3,
-      "title": "Prediction latency quantiles",
+      "title": "Latency quantiles",
       "type": "timeseries",
-      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 8 },
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 16 },
       "targets": [
         {
           "refId": "P50",
-          "expr": "histogram_quantile(0.5, sum(rate(doda_prediction_duration_seconds_bucket[5m])) by (le))",
+          "expr": "histogram_quantile(0.5, sum(rate(doda_prediction_duration_seconds_bucket[$__rate_interval])) by (le))",
           "legendFormat": "p50"
         },
         {
           "refId": "P90",
-          "expr": "histogram_quantile(0.9, sum(rate(doda_prediction_duration_seconds_bucket[5m])) by (le))",
+          "expr": "histogram_quantile(0.9, sum(rate(doda_prediction_duration_seconds_bucket[$__rate_interval])) by (le))",
           "legendFormat": "p90"
         },
         {
           "refId": "P99",
-          "expr": "histogram_quantile(0.99, sum(rate(doda_prediction_duration_seconds_bucket[5m])) by (le))",
+          "expr": "histogram_quantile(0.99, sum(rate(doda_prediction_duration_seconds_bucket[$__rate_interval])) by (le))",
           "legendFormat": "p99"
         }
       ]

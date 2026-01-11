@@ -29,7 +29,7 @@ spec:
         - name: MODEL_HOST
           value: {{ .Values.appService.modelServiceUrl | quote }}
         - name: APP_VERSION
-          value: canary
+          value: "v2-canary"
         envFrom:
         - configMapRef:
             name: {{ .Release.Name }}-configmap

@@ -2,6 +2,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: app-service
+  labels:
+    app: app-service
+    app.kubernetes.io/name: app-service
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   type: ClusterIP
   selector:
@@ -9,4 +13,4 @@ spec:
   ports:
   - name: http
     port: 80
-    targetPort: {{ .Values.appService.service.targetPort }}
+    targetPort: {{ .Values.appService.service.port }}
