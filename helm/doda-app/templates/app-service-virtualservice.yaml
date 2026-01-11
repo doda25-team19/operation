@@ -5,13 +5,10 @@ metadata:
   name: app-service-virtualservice
 spec:
   hosts:
-    {{- range .Values.istio.virtualService.hosts }}
-    - {{ . | quote }}
-    {{- end }}
-
+    - {{ .Values.hostname | quote }}
   gateways:
     - {{ .Release.Name }}-gateway
-
+    
   http:
     # 90/10 canary split with sticky sessions
     # The consistentHash in DestinationRule ensures users stick to their assigned version

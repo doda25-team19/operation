@@ -84,3 +84,19 @@ This week I was given the task to introduce sticky sessions, the PR is draft sin
 - Arda: https://github.com/doda25-team19/operation/pull/23
 Finalized the project documentation. Created docs/deployment.md with Mermaid diagrams visualizing the Istio Traffic Flow and the 90/10 Canary split strategy.
 
+- Mikolaj: https://github.com/doda25-team19/model-service/pull/4 https://github.com/doda25-team19/operation/pull/24
+Finalized A1/F10 - No hard-coded model. Implemented environment variable logic for model loading in the backend and updated the Helm chart to inject this configuration into the deployments.
+
+- Viktor: https://github.com/doda25-team19/operation/pull/25
+Worked on the experiment docs for A4, had to fix the values.yaml to use correct images for both versions and include the prerelease hosting. Also created a new virtual-service-prerelease.yaml
+
+### Week Q2.7
+- Arda: https://github.com/doda25-team19/operation/pull/26
+Added the Extension Proposal (A4) regarding Automated Canary Analysis with Flagger. Refactored the Helm Chart (A3) to externalize the Model Service URL in `values.yaml` for better configurability.
+
+- Mikolaj: https://github.com/doda25-team19/operation/pull/27
+Added Kubernetes resource requests and limits for the model-service deployments, which prevents resource contention in the cluster, improving overall application stability.
+
+- Miroslav: https://github.com/doda25-team19/model-service/pull/5
+Tested the model release workflow since I didn't manage to do it previously. It turned out to be fine, so no changes on that. Added documentation for the model training and releasing as well as how to test the model.
+
