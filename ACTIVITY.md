@@ -77,6 +77,9 @@ This week, I implemented my dedicated parts for A4. I added 2 deployment version
 - Arda: https://github.com/doda25-team19/operation/pull/22
 Researched Automated Canary Analysis (ACA) and Flagger to address manual verification shortcomings. Drafted the Extension Proposal docs/extension.md to fulfill the Release Engineering extension requirement.
 
+- Miroslav: https://github.com/doda25-team19/operation/pull/20
+This week I was given the task to introduce sticky sessions, the PR is draft since I don't have it yet. (wrapped up in week 6)
+
 ### Week Q2.6
 - Arda: https://github.com/doda25-team19/operation/pull/23
 Finalized the project documentation. Created docs/deployment.md with Mermaid diagrams visualizing the Istio Traffic Flow and the 90/10 Canary split strategy.
@@ -96,3 +99,4 @@ Added Kubernetes resource requests and limits for the model-service deployments,
 
 - Miroslav: https://github.com/doda25-team19/model-service/pull/5
 Tested the model release workflow since I didn't manage to do it previously. It turned out to be fine, so no changes on that. Added documentation for the model training and releasing as well as how to test the model.
+

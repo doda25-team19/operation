@@ -10,7 +10,8 @@ appService:
   replicaCount: 1
   image: "ghcr.io/doda25-team19/app:latest"
   service:
-    port: 8080
+    port: 80
+    targetPort: 8080
   imageStable: "ghcr.io/doda25-team19/app:old"
   imageCanary: "ghcr.io/doda25-team19/app:new"
           
@@ -19,7 +20,7 @@ modelService:
   replicaCount: 1
   image: "ghcr.io/doda25-team19/model-service:latest"
   service:
-    port: 8081   
+    port: 8081
     
 # This is for the private registry secret.
 imagePullSecrets:
@@ -38,6 +39,10 @@ appSecrets:
 sharedVolume:
   hostPath: "/mnt/shared"
   mountPath: "/data/shared"
+
+# flag or nginx to not interfere with istio
+nginx:
+  enabled: false
 
 # Istio configuration for service mesh features
 istio:
