@@ -106,3 +106,4 @@ Tested the model release workflow since I didn't manage to do it previously. It 
 - Benas: https://github.com/doda25-team19/app/pull/12 https://github.com/doda25-team19/model-service/pull/6
 This week, I implemented A1-F4: adding multi-architecture support for amd64 and arm64.
 
+- Viktor: https://github.com/doda25-team19/operation/pull/28 worked on the experiment and the dashboards
