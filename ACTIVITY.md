@@ -93,3 +93,6 @@ Added the Extension Proposal (A4) regarding Automated Canary Analysis with Flagg
 
 - Mikolaj: https://github.com/doda25-team19/operation/pull/27
 Added Kubernetes resource requests and limits for the model-service deployments, which prevents resource contention in the cluster, improving overall application stability.
+
+- Miroslav: https://github.com/doda25-team19/model-service/pull/5
+Tested the model release workflow since I didn't manage to do it previously. It turned out to be fine, so no changes on that. Added documentation for the model training and releasing as well as how to test the model.
