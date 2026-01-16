@@ -120,3 +120,7 @@ This week, I implemented A1-F4: adding multi-architecture support for amd64 and 
 
 - Jeroen: https://github.com/doda25-team19/app/pull/11
 This week I worked on A3 Application Instrumentation enhancements. I added Spring Boot Actuator and Micrometer Prometheus integration to expose custom Counter and Gauge metrics via the /actuator/prometheus endpoint. The application now tracks prediction success/error counters and input text length as a gauge, ensuring proper Prometheus scraping and resolving the "Whitelabel error page" issue with the metrics endpoint.
+
+### Week Q2.8
+- Arda: https://github.com/doda25-team19/lib-version/pull/4
+Upgraded the CI/CD pipeline to automatically tag pre-release commits in order to have consistency between the released artifact version and the Git history. Made this to satisfy the "Excellent" criteria for A1.
