@@ -130,3 +130,6 @@ Implemented A2 SSH host keys and HTTPS ingress. Added pre-generated server ident
 
 - Benas: https://github.com/doda25-team19/operation/pull/30
 This week, I have cleaned up the README.md documentation, addressing visible repetitions, inaccuracies and structure errors.
+
+- Miroslav: https://github.com/doda25-team19/app/pull/13
+While implementing the sticky session in the previous weeks, it was rather inconvenient to test, since the response didn't contain any information about the version, and I had to manually look at the logs of the app. I made a change to the endpoint, but then ran into issues with the lack of authorization of docker when pull lib-version from github. This is also fixed in this PR.
