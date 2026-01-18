@@ -16,6 +16,34 @@
     # Step 4: Register SSH Keys
     # -------------------------------
 
+    # 4a: Deploy pre-provided SSH host keys (server identity)
+    - name: Copy SSH host private keys
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: "/etc/ssh/{{ item | basename }}"
+        owner: root
+        group: root
+        mode: '0600'
+      loop:
+        - ssh_host_keys/ssh_host_rsa_key
+        - ssh_host_keys/ssh_host_ed25519_key
+        - ssh_host_keys/ssh_host_ecdsa_key
+      notify: Restart SSH
+
+    - name: Copy SSH host public keys
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: "/etc/ssh/{{ item | basename }}"
+        owner: root
+        group: root
+        mode: '0644'
+      loop:
+        - ssh_host_keys/ssh_host_rsa_key.pub
+        - ssh_host_keys/ssh_host_ed25519_key.pub
+        - ssh_host_keys/ssh_host_ecdsa_key.pub
+      notify: Restart SSH
+
+    # 4b: Deploy user authentication keys
     - name: Ensure ~/.ssh exists for vagrant user
       ansible.builtin.file:
         path: /home/vagrant/.ssh
@@ -206,3 +234,9 @@
         name: kubelet
         enabled: yes
         state: started
+
+  handlers:
+    - name: Restart SSH
+      ansible.builtin.service:
+        name: ssh
+        state: restarted
