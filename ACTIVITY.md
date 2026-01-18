@@ -124,3 +124,6 @@ This week I worked on A3 Application Instrumentation enhancements. I added Sprin
 ### Week Q2.8
 - Arda: https://github.com/doda25-team19/lib-version/pull/4
 Upgraded the CI/CD pipeline to automatically tag pre-release commits in order to have consistency between the released artifact version and the Git history. Made this to satisfy the "Excellent" criteria for A1.
+
+- Jeroen: https://github.com/doda25-team19/operation/pull/29
+Implemented A2 SSH host keys and HTTPS ingress. Added pre-generated server identity keys to prevent fingerprint warnings and configured TLS termination for the Kubernetes Dashboard.
