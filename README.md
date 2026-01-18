@@ -38,7 +38,6 @@ The `doda-app` Helm chart will deploy the application, Prometheus (for metrics),
     helm dependency update
     ```
 
-
 3.  **Create SMTP Secret (for Alertmanager):**
     This secret is required by the Prometheus stack for sending alerts.
     ```bash
@@ -144,22 +143,8 @@ helm uninstall doda-app-release              # Uninstall
 helm install doda-app-release . --set hostname="my-grading-url.local"
 ```
 
-### Verification (Assignment A3)
-
-**ConfigMap & Secret Injection:**
-```bash
-APP_POD=$(kubectl get pod -l app=app-service -o jsonpath="{.items[0].metadata.name}")
-kubectl describe pod $APP_POD | grep -A5 "Environment Variables"
-# Should show doda-app-release-configmap and doda-app-release-secret
-```
-
-**HostPath Volume Mount:**
-```bash
-MODEL_POD=$(kubectl get pod -l app=model-service -o jsonpath="{.items[0].metadata.name}")
-kubectl describe pod $MODEL_POD | grep -A5 "Mounts"
-# Should show /data/shared mounted from shared-data-volume
-```
 ---
+
 ## Monitoring
 
 ### Setup (Minikube)
@@ -167,9 +152,7 @@ kubectl describe pod $MODEL_POD | grep -A5 "Mounts"
 minikube start
 minikube addons enable ingress
 kubectl get pods -n ingress-nginx -w  # Wait for ready
-
 cd helm/doda-app
-helm dependency update
 
 ### Appendix: Local Development with Minikube & Troubleshooting
 
@@ -186,6 +169,7 @@ If you are testing locally without the A2 cluster or are facing networking issue
 2.  **Follow the main installation steps above.**
 
 3.  **Test Connectivity (Minikube on macOS):**
+
     Due to Docker networking, you must use `minikube service` to get a temporary URL.
     ```bash
     minikube service -n ingress-nginx ingress-nginx-controller --url
@@ -197,26 +181,12 @@ If you are testing locally without the A2 cluster or are facing networking issue
     curl -H "Host: metrics.doda-app.local" http://127.0.0.1:XXXXX/metrics
     ```
 
-# Create alertmanager secret
-kubectl create secret generic alertmanager-email-secret \
-  --from-literal=password="password" -n default
-
 # Install or upgrade
 helm install doda-app . -f values.yaml    # First time
 helm upgrade doda-app . -f values.yaml    # Update
 
 # Verify
 kubectl get pods,servicemonitor,ingress,prometheusrule
-```
-
-### Testing (macOS/Minikube)
-```bash
-# Get minikube URL
-minikube service -n ingress-nginx ingress-nginx-controller --url
-
-# Test with first URL (HTTP port)
-curl -H "Host: doda-app.local" http://127.0.0.1:XXXXX
-curl -H "Host: metrics.doda-app.local" http://127.0.0.1:XXXXX/metrics
 ```
 
 ---
