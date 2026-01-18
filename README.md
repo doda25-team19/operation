@@ -54,9 +54,9 @@ The `doda-app` Helm chart will deploy the application, Prometheus (for metrics),
     ```
     *(If you need to update an existing deployment, use `helm upgrade` instead.)*
 
-### 2. Accessing the Services (Ingress)
+### 2. Accessing the Application
 
-#### Accessing the Application
+#### Frontend Application
 
 1.  **Find the Ingress IP Address:**
     Get the external IP address assigned to the Ingress Controller by MetalLB.
@@ -74,6 +74,8 @@ The `doda-app` Helm chart will deploy the application, Prometheus (for metrics),
 
 3.  **Open in Browser:**
     You can now access the application at **http://doda-app.local**.
+
+**Fallback (port-forward):** `kubectl port-forward svc/app-service 8080:80` then access **http://localhost:8080**
 
 #### Accessing Grafana
 
@@ -141,14 +143,6 @@ helm uninstall doda-app-release              # Uninstall
 ```bash
 helm install doda-app-release . --set hostname="my-grading-url.local"
 ```
-
-### Accessing the Application
-
-1. Get LoadBalancer IP: `kubectl get svc -n ingress-nginx`
-2. Add to `/etc/hosts`: `<EXTERNAL-IP> doda-app.local`
-3. Browse: http://doda-app.local
-
-**Fallback (port-forward):** `kubectl port-forward svc/app-service 8080:80` then access http://localhost:8080
 
 ### Verification (Assignment A3)
 
@@ -463,10 +457,18 @@ kubectl -n kubernetes-dashboard create token admin-user
 ```
 
 ## Assignment 1: Containerization
-We have implemented subtasks F1, F2, F3, F6, F7, F8, F11.
+In this assignment, we have successfully reorganized the SMS Checker project into 4 repositories:
+**model-service**
+**lib-version**
+**app**
+**operation**
+
+We have implemented all features required, extended the application and started maturing the release engineering practices.
 
 ### How to Run (Local Docker)
 To run the application containerized locally without Kubernetes:
 ```bash
 docker-compose up
 ```
+
+To access the frontend, open your browser at **http://localhost:8080/sms**
