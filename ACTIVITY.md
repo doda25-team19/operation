@@ -127,3 +127,6 @@ Upgraded the CI/CD pipeline to automatically tag pre-release commits in order to
 
 - Jeroen: https://github.com/doda25-team19/operation/pull/29
 Implemented A2 SSH host keys and HTTPS ingress. Added pre-generated server identity keys to prevent fingerprint warnings and configured TLS termination for the Kubernetes Dashboard.
+
+- Benas: https://github.com/doda25-team19/operation/pull/30
+This week, I have cleaned up the README.md documentation, addressing visible repetitions, inaccuracies and structure errors.
