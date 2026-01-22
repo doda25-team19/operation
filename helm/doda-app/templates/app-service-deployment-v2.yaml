@@ -13,17 +13,23 @@ spec:
       labels:
         app: app-service
         version: v2-canary
+      annotations:
+        sidecar.istio.io/inject: "true"
     spec:
       imagePullSecrets:
 {{ toYaml .Values.imagePullSecrets | nindent 8 }}
       containers:
       - name: app-service
-        image: "{{ .Values.appService.image }}"
+        image: "{{ .Values.appService.imageCanary }}"
         ports:
         - containerPort: {{ .Values.appService.service.port }}
         env:
         - name: MODEL_SERVICE_URL
           value: {{ .Values.appService.modelServiceUrl | quote }}
+        - name: MODEL_HOST
+          value: "http://model-service:80"
+        - name: APP_VERSION
+          value: new
         envFrom:
         - configMapRef:
             name: {{ .Release.Name }}-configmap
@@ -35,4 +41,4 @@ spec:
             memory: 128Mi
           limits:
             cpu: 500m
-            memory: 512Mi
+            memory: 512Mi          

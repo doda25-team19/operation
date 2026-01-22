@@ -2,6 +2,7 @@
   
 # Global setting for the Ingress hostname.
 hostname: "doda-app.local"
+prereleaseHostname: "prerelease.doda-app.local"
 metricsHostname: "metrics.doda-app.local"
     
 # Settings for the App Service (frontend/api)
@@ -10,7 +11,10 @@ appService:
   image: "ghcr.io/doda25-team19/app:latest"
   modelServiceUrl: "http://model-service:80" 
   service:
-    port: 8080
+    port: 80
+    targetPort: 8080
+  imageStable: "ghcr.io/doda25-team19/app:old"
+  imageCanary: "ghcr.io/doda25-team19/app:new"
           
 # Settings for the Model Service (backend)
 modelService:
@@ -18,6 +22,8 @@ modelService:
   image: "ghcr.io/doda25-team19/model-service:latest"
   service:
     port: 8081   
+  modelFile: "/data/shared/model.joblib"
+  modelUrl: ""
     
 # This is for the private registry secret.
 imagePullSecrets:
@@ -36,6 +42,24 @@ appSecrets:
 sharedVolume:
   hostPath: "/mnt/shared"
   mountPath: "/data/shared"
+
+# flag or nginx to not interfere with istio
+nginx:
+  enabled: false
+
+# Istio configuration for service mesh features
+istio:
+  enabled: true
+  sidecarInjection:
+    enabled: false
+  rateLimiting:
+    enabled: true
+    requestsPerMinute: 5
+    burstSize: 5
+    fillInterval: 60
+  gateway:
+    name: ingressgateway
+    namespace: istio-system
 
 grafana:
   enabled: true
@@ -104,13 +128,3 @@ kube-prometheus-stack:
         label: grafana_dashboard
         labelValue: "1"
         searchNamespace: default
-
-
-istio:
-  enabled: true
-  gateway:
-    name: ingressgateway
-    namespace: istio-system
-  virtualService:
-    hosts:
-      - "*"

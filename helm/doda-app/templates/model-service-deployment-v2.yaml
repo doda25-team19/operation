@@ -13,6 +13,8 @@ spec:
       labels:
         app: model-service
         version: v2-canary
+      annotations:
+        sidecar.istio.io/inject: "true"
     spec:
       imagePullSecrets:
         {{- toYaml .Values.imagePullSecrets | nindent 8 }}
@@ -25,6 +27,14 @@ spec:
       containers:
         - name: model-service
           image: "{{ .Values.modelService.image }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
+          env:
+            - name: MODEL_FILE
+              value: "{{ .Values.modelService.modelFile }}"
+            {{- with .Values.modelService.modelUrl }}
+            - name: MODEL_URL
+              value: "{{ . }}"
+            {{- end }}
           ports:
             - containerPort: {{ .Values.modelService.service.port }}
           volumeMounts:
