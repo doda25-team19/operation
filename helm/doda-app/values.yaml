@@ -9,6 +9,7 @@ metricsHostname: "metrics.doda-app.local"
 appService:   
   replicaCount: 1
   image: "ghcr.io/doda25-team19/app:latest"
+  modelServiceUrl: "http://model-service:80" 
   service:
     port: 80
     targetPort: 8080
