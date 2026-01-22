@@ -1,16 +1,13 @@
 # DODA Project - Team 19
 
 ## Architecture
-The application consists of a microservices architecture:
-1.  **App (Frontend):** A web interface serving the UI.
-2.  **Model Service (Backend):** A Python-based service hosting the machine learning model.
-3.  **Lib-Version:** A shared Java library for version awareness used by the components.
+Microservices application with:
+- **App (Frontend):** Web UI
+- **Model Service (Backend):** Python ML prediction service
+- **Lib-Version:** Shared Java library for version awareness
 
 ## Repositories
-- **Operation:** [doda25-team19/operation](https://github.com/doda25-team19/operation)
-- **App:** [doda25-team19/app](https://github.com/doda25-team19/app)
-- **Model Service:** [doda25-team19/model-service](https://github.com/doda25-team19/model-service)
-- **Lib Version:** [doda25-team19/lib-version](https://github.com/doda25-team19/lib-version)
+- [Operation](https://github.com/doda25-team19/operation) | [App](https://github.com/doda25-team19/app) | [Model Service](https://github.com/doda25-team19/model-service) | [Lib Version](https://github.com/doda25-team19/lib-version)
 
 ---
 
@@ -40,6 +37,7 @@ The `doda-app` Helm chart will deploy the application, Prometheus (for metrics),
     ```bash
     helm dependency update
     ```
+
 
 3.  **Create SMTP Secret (for Alertmanager):**
     This secret is required by the Prometheus stack for sending alerts.
@@ -128,6 +126,57 @@ Run these commands to verify that the Kubernetes usage requirements have been me
 
 ---
 
+## Application Deployment (Helm Chart)
+
+### Installation
+
+```bash
+cd operation/helm/doda-app
+helm install doda-app-release .              # Install
+helm upgrade doda-app-release . -f values.yaml  # Upgrade
+helm uninstall doda-app-release              # Uninstall
+```
+
+**Custom hostname for grading:**
+```bash
+helm install doda-app-release . --set hostname="my-grading-url.local"
+```
+
+### Accessing the Application
+
+1. Get LoadBalancer IP: `kubectl get svc -n ingress-nginx`
+2. Add to `/etc/hosts`: `<EXTERNAL-IP> doda-app.local`
+3. Browse: http://doda-app.local
+
+**Fallback (port-forward):** `kubectl port-forward svc/app-service 8080:80` then access http://localhost:8080
+
+### Verification (Assignment A3)
+
+**ConfigMap & Secret Injection:**
+```bash
+APP_POD=$(kubectl get pod -l app=app-service -o jsonpath="{.items[0].metadata.name}")
+kubectl describe pod $APP_POD | grep -A5 "Environment Variables"
+# Should show doda-app-release-configmap and doda-app-release-secret
+```
+
+**HostPath Volume Mount:**
+```bash
+MODEL_POD=$(kubectl get pod -l app=model-service -o jsonpath="{.items[0].metadata.name}")
+kubectl describe pod $MODEL_POD | grep -A5 "Mounts"
+# Should show /data/shared mounted from shared-data-volume
+```
+---
+## Monitoring
+
+### Setup (Minikube)
+```bash
+minikube start
+minikube addons enable ingress
+kubectl get pods -n ingress-nginx -w  # Wait for ready
+
+cd helm/doda-app
+helm dependency update
+
 ### Appendix: Local Development with Minikube & Troubleshooting
 
 If you are testing locally without the A2 cluster or are facing networking issues on macOS, you can use Minikube.
@@ -154,6 +203,176 @@ If you are testing locally without the A2 cluster or are facing networking issue
     curl -H "Host: metrics.doda-app.local" http://127.0.0.1:XXXXX/metrics
     ```
 
+# Create alertmanager secret
+kubectl create secret generic alertmanager-email-secret \
+  --from-literal=password="password" -n default
+
+# Install or upgrade
+helm install doda-app . -f values.yaml    # First time
+helm upgrade doda-app . -f values.yaml    # Update
+
+# Verify
+kubectl get pods,servicemonitor,ingress,prometheusrule
+```
+
+### Testing (macOS/Minikube)
+```bash
+# Get minikube URL
+minikube service -n ingress-nginx ingress-nginx-controller --url
+
+# Test with first URL (HTTP port)
+curl -H "Host: doda-app.local" http://127.0.0.1:XXXXX
+curl -H "Host: metrics.doda-app.local" http://127.0.0.1:XXXXX/metrics
+```
+
+---
+
+## Istio Rate Limiting
+
+Per-IP rate limiting (5 req/min) on model-service using Istio EnvoyFilter with token bucket algorithm. Returns HTTP 429 when limit exceeded.
+
+### Verification
+
+```bash
+kubectl get pods  # Should show 2/2 containers (app + istio-proxy)
+kubectl get virtualservice,destinationrule,envoyfilter
+```
+
+### Testing Rate Limiting
+
+**Test 1: Basic Rate Limiting**
+
+Send 7 requests quickly to observe rate limiting in action:
+```bash
+for i in {1..7}; do
+  curl -X POST http://doda-app.local/predict \
+    -H "Content-Type: application/json" \
+    -d '{"sms":"test message"}' \
+    -w "\nStatus: %{http_code}\n"
+  sleep 1
+done
+```
+
+**Expected Result:**
+- Requests 1-5: HTTP 200 (success)
+- Requests 6-7: HTTP 429 (rate limited)
+
+**Test 2: Token Bucket Refill**
+
+Verify that rate limits reset after the fill interval:
+```bash
+# Hit the rate limit
+for i in {1..6}; do
+  curl -X POST http://doda-app.local/predict \
+    -H "Content-Type: application/json" \
+    -d '{"sms":"test"}' -s -o /dev/null
+done
+
+# Wait for token bucket to refill
+echo "Waiting 60 seconds for token refill..."
+sleep 60
+
+# Try again - should succeed
+curl -X POST http://doda-app.local/predict \
+  -H "Content-Type: application/json" \
+  -d '{"sms":"test message"}' \
+  -w "\nStatus: %{http_code}\n"
+```
+
+**Expected Result:** After 60 seconds, the request succeeds (HTTP 200)
+
+**Test 3: Per-IP Isolation**
+
+Different client IPs have independent quotas. If you have access to multiple machines or can use different source IPs, verify that rate limiting is isolated per IP.
+
+### Viewing Envoy Metrics
+
+Check Istio's rate limiting metrics from the Envoy proxy:
+```bash
+# Get the model-service pod name
+MODEL_POD=$(kubectl get pod -l app=model-service -o jsonpath="{.items[0].metadata.name}")
+
+# View rate limiting metrics
+kubectl exec -it $MODEL_POD -c istio-proxy -- \
+  curl localhost:15000/stats/prometheus | grep local_rate_limit
+```
+
+Look for metrics like:
+- `envoy_local_rate_limit_enabled`
+- `envoy_local_rate_limit_enforced`
+- `envoy_http_local_rate_limit_rate_limited`
+
+### Configuration
+
+Rate limiting settings are configurable in `values.yaml`:
+
+```yaml
+istio:
+  enabled: true  # Enable/disable Istio features
+  sidecarInjection:
+    enabled: true  # Enable sidecar injection
+  rateLimiting:
+    enabled: true  # Enable rate limiting
+    requestsPerMinute: 5  # Not used directly (kept for clarity)
+    burstSize: 5  # Maximum tokens in bucket
+    fillInterval: 60  # Token refill interval in seconds
+```
+
+**To adjust rate limits:**
+
+1. Edit `helm/doda-app/values.yaml`
+2. Modify `istio.rateLimiting.burstSize` (max requests) or `fillInterval` (refill period)
+3. Upgrade the Helm release:
+   ```bash
+   cd helm/doda-app
+   helm upgrade doda-app . -f values.yaml
+   ```
+4. Wait for pods to restart with updated configuration
+
+**Example:** To allow 10 requests per 2 minutes:
+```yaml
+istio:
+  rateLimiting:
+    burstSize: 10
+    fillInterval: 120
+```
+
+### Disabling Rate Limiting
+
+To disable rate limiting without removing Istio:
+```yaml
+istio:
+  rateLimiting:
+    enabled: false
+```
+
+To disable all Istio features:
+```yaml
+istio:
+  enabled: false
+  sidecarInjection:
+    enabled: false
+  rateLimiting:
+    enabled: false
+```
+
+Then upgrade the Helm release.
+
+### Troubleshooting
+
+**Issue:** Pods show 1/1 containers instead of 2/2
+- **Cause:** Istio sidecar injection is not working
+- **Solution:** Ensure Istio is installed: `kubectl get pods -n istio-system`
+- **Solution:** Check deployment annotations: `kubectl get deployment model-service -o yaml | grep sidecar.istio.io/inject`
+
+**Issue:** Rate limiting not working (all requests succeed)
+- **Cause:** EnvoyFilter not applied
+- **Solution:** Check if EnvoyFilter exists: `kubectl get envoyfilter`
+- **Solution:** Check Envoy configuration: `kubectl exec -it $MODEL_POD -c istio-proxy -- curl localhost:15000/config_dump | grep local_rate_limit`
+
+**Issue:** All requests return HTTP 429 immediately
+- **Cause:** Rate limit configuration too restrictive or misconfigured
+- **Solution:** Check values.yaml settings and ensure `burstSize` and `fillInterval` are reasonable
 
 
 ## Assignment 2: Provisioning a Kubernetes Cluster

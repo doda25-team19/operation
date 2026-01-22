@@ -1,32 +1,36 @@
 {{- if .Values.istio.enabled }}
-apiVersion: networking.istio.io/v1alpha3
+apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
   name: app-service-virtualservice
 spec:
   hosts:
-    {{- range .Values.istio.virtualService.hosts }}
-    - {{ . | quote }}
-    {{- end }}
-
+    - {{ .Values.hostname | quote }}
   gateways:
     - {{ .Release.Name }}-gateway
-
+    
   http:
-    - match:
-        - uri:
-            prefix: /
-      route:
+    # 90/10 canary split with sticky sessions
+    # The consistentHash in DestinationRule ensures users stick to their assigned version
+    - route:
         - destination:
             host: app-service
             subset: stable
             port:
-              number: 80
+              number: {{ .Values.appService.service.port }}
           weight: 90
+          headers:
+            request:
+              add:
+                x-session-hash: "%REQ(x-user-id)%"
         - destination:
             host: app-service
             subset: canary
             port:
-              number: 80
+              number: {{ .Values.appService.service.port }}
           weight: 10
+          headers:
+            request:
+              add:
+                x-session-hash: "%REQ(x-user-id)%"
 {{- end }}
