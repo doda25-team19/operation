@@ -20,13 +20,9 @@ modelService:
   replicaCount: 1
   image: "ghcr.io/doda25-team19/model-service:latest"
   service:
-<<<<<<< HEAD
     port: 8081   
   modelFile: "/data/shared/model.joblib"
   modelUrl: ""
-=======
-    port: 8081
->>>>>>> fd4b391 ([WIP]: sticky session)
     
 # This is for the private registry secret.
 imagePullSecrets:
