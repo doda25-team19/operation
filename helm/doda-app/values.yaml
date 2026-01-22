@@ -17,6 +17,8 @@ modelService:
   image: "ghcr.io/doda25-team19/model-service:latest"
   service:
     port: 8081   
+  modelFile: "/data/shared/model.joblib"
+  modelUrl: ""
     
 # This is for the private registry secret.
 imagePullSecrets:

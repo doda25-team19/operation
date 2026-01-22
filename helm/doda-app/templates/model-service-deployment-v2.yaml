@@ -2,38 +2,41 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: model-service-v2
-  labels:
-    app: model-service
-    version: v2
 spec:
   replicas: {{ .Values.modelService.replicaCount }}
   selector:
     matchLabels:
       app: model-service
-      version: v2
+      version: v2-canary
   template:
     metadata:
       labels:
         app: model-service
-        version: v2
+        version: v2-canary
+      annotations:
+        sidecar.istio.io/inject: "true"
     spec:
       imagePullSecrets:
-{{ toYaml .Values.imagePullSecrets | nindent 8 }}
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+
       volumes:
         - name: shared-data-volume
           hostPath:
             path: {{ .Values.sharedVolume.hostPath }}
+
       containers:
         - name: model-service
           image: "{{ .Values.modelService.image }}"
           imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
           env:
             - name: MODEL_FILE
-              value: "output/model.joblib"
+              value: "{{ .Values.modelService.modelFile }}"
+            {{- with .Values.modelService.modelUrl }}
+            - name: MODEL_URL
+              value: "{{ . }}"
+            {{- end }}
           ports:
-            - name: http
-              containerPort: {{ .Values.modelService.service.port }}
-              protocol: TCP
+            - containerPort: {{ .Values.modelService.service.port }}
           volumeMounts:
             - name: shared-data-volume
               mountPath: {{ .Values.sharedVolume.mountPath }}
