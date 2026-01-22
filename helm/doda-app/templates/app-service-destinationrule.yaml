@@ -5,6 +5,10 @@ metadata:
   name: app-service-destinationrule
 spec:
   host: app-service
+  trafficPolicy:
+    loadBalancer:
+      consistentHash:
+        httpHeaderName: "x-user-id"
   subsets:
     - name: stable
       labels:
