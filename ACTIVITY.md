@@ -77,6 +77,9 @@ This week, I implemented my dedicated parts for A4. I added 2 deployment version
 - Arda: https://github.com/doda25-team19/operation/pull/22
 Researched Automated Canary Analysis (ACA) and Flagger to address manual verification shortcomings. Drafted the Extension Proposal docs/extension.md to fulfill the Release Engineering extension requirement.
 
+- Miroslav: https://github.com/doda25-team19/operation/pull/20
+This week I was given the task to introduce sticky sessions, the PR is draft since I don't have it yet. (wrapped up in week 6)
+
 ### Week Q2.6
 - Arda: https://github.com/doda25-team19/operation/pull/23
 Finalized the project documentation. Created docs/deployment.md with Mermaid diagrams visualizing the Istio Traffic Flow and the 90/10 Canary split strategy.
@@ -86,3 +89,47 @@ Finalized A1/F10 - No hard-coded model. Implemented environment variable logic f
 
 - Viktor: https://github.com/doda25-team19/operation/pull/25
 Worked on the experiment docs for A4, had to fix the values.yaml to use correct images for both versions and include the prerelease hosting. Also created a new virtual-service-prerelease.yaml
+
+- Jeroen: this week I was sick (food poisoning) and couldn't contribute.
+
+- Miroslav: https://github.com/doda25-team19/operation/pull/20
+I managed to wrap up the PR from last week; there was a bug with the istio and nginx that were fighting for the same port and it took quite some digging to see the issue.
+
+### Week Q2.7
+- Arda: https://github.com/doda25-team19/operation/pull/26
+Added the Extension Proposal (A4) regarding Automated Canary Analysis with Flagger. Refactored the Helm Chart (A3) to externalize the Model Service URL in `values.yaml` for better configurability.
+
+- Mikolaj: https://github.com/doda25-team19/operation/pull/27
+Added Kubernetes resource requests and limits for the model-service deployments, which prevents resource contention in the cluster, improving overall application stability.
+
+- Miroslav: https://github.com/doda25-team19/model-service/pull/5
+Tested the model release workflow since I didn't manage to do it previously. It turned out to be fine, so no changes on that. Added documentation for the model training and releasing as well as how to test the model.
+
+- Benas: https://github.com/doda25-team19/app/pull/12 https://github.com/doda25-team19/model-service/pull/6
+This week, I implemented A1-F4: adding multi-architecture support for amd64 and arm64.
+
+- Viktor: https://github.com/doda25-team19/operation/pull/28 worked on the experiment and the dashboards
+
+- Miroslav: https://github.com/doda25-team19/model-service/pull/5
+Tested the model release workflow since I didn't manage to do it previously. It turned out to be fine, so no changes on that. Added documentation for the model training and releasing as well as how to test the model.
+
+- Benas: https://github.com/doda25-team19/app/pull/12 https://github.com/doda25-team19/model-service/pull/6
+This week, I implemented A1-F4: adding multi-architecture support for amd64 and arm64.
+
+- Viktor: https://github.com/doda25-team19/operation/pull/28 worked on the experiment and the dashboards
+
+- Jeroen: https://github.com/doda25-team19/app/pull/11
+This week I worked on A3 Application Instrumentation enhancements. I added Spring Boot Actuator and Micrometer Prometheus integration to expose custom Counter and Gauge metrics via the /actuator/prometheus endpoint. The application now tracks prediction success/error counters and input text length as a gauge, ensuring proper Prometheus scraping and resolving the "Whitelabel error page" issue with the metrics endpoint.
+
+### Week Q2.8
+- Arda: https://github.com/doda25-team19/lib-version/pull/4
+Upgraded the CI/CD pipeline to automatically tag pre-release commits in order to have consistency between the released artifact version and the Git history. Made this to satisfy the "Excellent" criteria for A1.
+
+- Jeroen: https://github.com/doda25-team19/operation/pull/29
+Implemented A2 SSH host keys and HTTPS ingress. Added pre-generated server identity keys to prevent fingerprint warnings and configured TLS termination for the Kubernetes Dashboard.
+
+- Benas: https://github.com/doda25-team19/operation/pull/30
+This week, I have cleaned up the README.md documentation, addressing visible repetitions, inaccuracies and structure errors.
+
+- Miroslav: https://github.com/doda25-team19/app/pull/13
+While implementing the sticky session in the previous weeks, it was rather inconvenient to test, since the response didn't contain any information about the version, and I had to manually look at the logs of the app. I made a change to the endpoint, but then ran into issues with the lack of authorization of docker when pull lib-version from github. This is also fixed in this PR.

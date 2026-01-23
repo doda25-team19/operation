@@ -5,11 +5,23 @@ metadata:
   name: app-service-destinationrule
 spec:
   host: app-service
+  trafficPolicy:
+    loadBalancer:
+      consistentHash:
+        httpHeaderName: "x-user-id"
   subsets:
     - name: stable
       labels:
         version: v1-stable
+      trafficPolicy:
+        loadBalancer:
+          consistentHash:
+            httpHeaderName: "x-user-id"
     - name: canary
       labels:
         version: v2-canary
+      trafficPolicy:
+        loadBalancer:
+          consistentHash:
+            httpHeaderName: "x-user-id"
 {{- end }}
