@@ -3,58 +3,77 @@
 ## 1. Identified Shortcoming: Manual Verification of Canary Releases
 
 **Current State:**
-In the current architecture (Assignment 4), we implemented a Canary Release strategy using Istio. We split traffic 90/10 between stable and canary versions. However, the decision process to promote the canary (increase traffic) or rollback (if errors occur) is entirely **manual**.
+In our current architecture (Assignment 4), we implemented a Canary Release strategy using Istio with a 90/10 traffic split. However, the decision process to promote a new version or trigger a rollback is entirely **manual**. 
 
 **The Pain Point:**
-A release engineer must:
-1.  Deploy the new version.
-2.  Manually edit `VirtualService` weights.
-3.  Stare at Grafana dashboards for latency or error spikes.
-4.  Manually revert configuration if issues arise.
-
-**Risks:**
-*   **Human Error:** Misinterpreting a metric spike or reacting too slowly to errors.
-*   **Scalability:** This process cannot scale to hundreds of microservices; it requires a human in the loop for every deployment.
-*   **Downtime:** If the canary is broken, users suffer until a human notices and manually rolls back.
+Currently, a release engineer must manually deploy the new version, monitor Grafana dashboards for latency or error spikes, and manually update the `VirtualService` weights in the Helm chart to complete the release or revert it. This introduces:
+* **Human Error:** Risk of misinterpreting metrics or reacting too slowly to a broken release.
+* **Scalability Bottlenecks:** This process requires a human-in-the-loop for every microservice deployment.
+* **Increased MTTR:** Manual detection and rollback lead to longer recovery times during failures.
 
 ## 2. Proposed Extension: Progressive Delivery with Flagger
 
-To address this, I propose implementing **Automated Canary Analysis (ACA)** using [Flagger](https://flagger.app/), a Kubernetes operator that automates the promotion of canary deployments using Istio.
+**We propose** implementing **Automated Canary Analysis (ACA)** using [Flagger](https://flagger.app/), a Kubernetes operator that automates traffic shifting and analysis by interacting directly with Istio and Prometheus.
 
-### Architecture Changes
-Instead of manually defining `VirtualService` weights in our Helm chart, we will delegate traffic management to the Flagger operator.
+### 2.1 Concrete Technical Configuration
+**We will** introduce a `Canary` Custom Resource to our Helm chart. This replaces our manual weight management in the `VirtualService` with an automated loop.
 
-1.  **Install Flagger Controller:** Run Flagger in the cluster alongside Istio.
-2.  **Define `Canary` CRD:** Introduce a Custom Resource Definition that defines:
-    *   **Target:** The deployment to track (e.g., `app-service`).
-    *   **Analysis Interval:** How often to check metrics (e.g., every 1 minute).
-    *   **Thresholds:** Max request duration (e.g., 500ms) and success rate (e.g., 99%).
-    *   **Step Weight:** How much to increase traffic per step (e.g., 5% -> 10% -> 50%).
+```yaml
+apiVersion: flagger.app/v1beta1
+kind: Canary
+metadata:
+  name: app-service
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: app-service
+  service:
+    port: 80
+    targetPort: 8080
+    gateways: [ {{ .Release.Name }}-gateway ]
+    hosts: [ {{ .Values.hostname | quote }} ]
+  analysis:
+    interval: 1m      # Frequency of metric checks
+    threshold: 5      # Max failed checks before automatic rollback
+    maxWeight: 50     # Max canary traffic percentage
+    stepWeight: 10    # Traffic increase per successful interval
+    metrics:
+      - name: "prediction-success-rate"
+        templateRef:
+          name: doda-success-rate
+        thresholdRange:
+          min: 99
+        interval: 1m
+      - name: "prediction-latency"
+        templateRef:
+          name: doda-p90-latency
+        thresholdRange:
+          max: 500
+        interval: 1m
+```
 
-### Visualizing the Improvement
+### 2.2 Automated Metrics & Decision Criteria
+Flagger will automate the decision process by monitoring the following concrete PromQL queries derived from our existing application metrics:
 
-**Before (Current):**
-`Developer -> Helm Install -> [Manual Wait/Check Grafana] -> [Manual Update Weight] -> Release`
+1. **Success Rate:** `sum(irate(doda_predictions_total{app="app-service", version="new", result!="error"}[1m])) / sum(irate(doda_predictions_total{app="app-service", version="new"}[1m])) * 100`
+2. **P90 Latency:** `histogram_quantile(0.90, sum(irate(doda_prediction_duration_seconds_bucket{app="app-service", version="new"}[1m])) by (le))`
 
-**After (Proposed):**
-`Developer -> Helm Install -> Flagger detects change -> [Loop: Adjust Istio Traffic -> Query Prometheus -> Check Thresholds -> Continue/Rollback] -> Release`
+**Advanced Reliability Check:** 
+Since our existing Rate Limiting (EnvoyFilter) injects the header `x-local-rate-limit: true`, we will extend the analysis to monitor this header. If the canary triggers significantly more throttling than the stable version, Flagger will identify the performance regression and halt the rollout automatically.
 
-### Implementation Plan (1-3 Days Effort)
+## 3. Experiment Design: Measuring the Impact of ACA
 
-1.  **Provisioning:** Update Ansible `ctrl.yaml` to install the Flagger Helm chart.
-2.  **Metrics:** Ensure our existing Prometheus setup exposes the Istio metrics (`istio_requests_total`, `istio_request_duration_seconds`) which Flagger queries by default.
-3.  **Refactoring:**
-    *   Remove explicit `VirtualService` and `DestinationRule` definitions from our `doda-app` Helm chart.
-    *   Add a `canary.yaml` template to the Helm chart.
-4.  **Testing:** Deliberately deploy a broken version (returning 500 errors) and verify that Flagger automatically halts traffic to the canary and rolls back without human intervention.
+To objectively evaluate this extension, **we will conduct** a fault-injection experiment to compare our current manual process against the proposed automated system.
 
-## 3. Assumptions and Downsides
+**Hypothesis:** *Automating canary analysis with Flagger reduces the Mean Time to Detection (MTTD) of a faulty release and eliminates manual human intervention time.*
 
-*   **Complexity:** Introducing another operator adds complexity to the cluster. If Flagger fails, deployments might get stuck.
-*   **Metric Reliance:** The automation is only as good as the metrics. If the app fails silently (returning HTTP 200 but empty bodies), Flagger will wrongly promote the release. We must implement deep health checks.
+**Methodology:**
+1. **Control Group (Current):** We deploy a faulty version of `app-service` (20% error rate). A team member monitors Grafana and manually updates the `VirtualService` to roll back traffic. We record the total time elapsed.
+2. **Experimental Group (Proposed):** We deploy the same faulty version with Flagger enabled. Flagger detects the breach of the 99% success rate threshold via Prometheus and automatically reverts the Istio weights to 0% for the canary.
+3. **KPI Comparison:** We expect the automated system to trigger a rollback within 2 minutes (the configured analysis interval), whereas the manual process typically requires 5-10 minutes of human observation and command-line execution.
 
 ## 4. References
-
-1.  **Flagger Documentation:** *Istio Canary Deployments.* Available at: [https://docs.flagger.app/tutorials/istio-progressive-delivery](https://docs.flagger.app/tutorials/istio-progressive-delivery)
-2.  **Martin Fowler:** *CanaryRelease.* Available at: [https://martinfowler.com/bliki/CanaryRelease.html](https://martinfowler.com/bliki/CanaryRelease.html) - Discusses the conceptual foundation of reducing risk.
-3.  **Google SRE Book:** *Service Level Objectives.* Explains why error budgets and automated monitoring are critical for reliability.
+1. **Flagger Documentation:** *Istio Canary Deployments.* [https://docs.flagger.app/tutorials/istio-progressive-delivery](https://docs.flagger.app/tutorials/istio-progressive-delivery)
+2. **DODA Application Metrics:** Defined in `docs/continuous-experimentation.md`.
+3. **Google SRE Book:** *Monitoring Distributed Systems* (Chapter 6) - On the importance of automated response for reducing operational toil.
