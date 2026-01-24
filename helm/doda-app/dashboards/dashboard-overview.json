@@ -62,6 +62,22 @@
           "legendFormat": "p99"
         }
       ]
+    },
+    {
+      "id": 4,
+      "title": "Total predictions by result",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 17 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (result) (doda_predictions_total)",
+          "legendFormat": "{{result}}"
+        }
+      ],
+      "options": {
+        "orientation": "horizontal"
+      }
     }
   ],
   "templating": {
