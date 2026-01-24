@@ -55,7 +55,7 @@
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
 
-    # --- NEW: Create Default TLS Secret for Controller ---
+    # --- HTTPS INGRESS SETUP START ---
     - name: Create default TLS secret for Ingress Controller
       ansible.builtin.command: >
         kubectl create secret tls ingress-tls
@@ -72,7 +72,7 @@
         echo '{{ default_tls_secret_yaml.stdout }}' | kubectl apply -f -
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
-    # -----------------------------------------------------
+    # --- HTTPS INGRESS SETUP END ---
 
     - name: Add ingress nginx Helm repo
       ansible.builtin.command: >
@@ -94,7 +94,6 @@
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
 
-    # --- MODIFIED: Added default-ssl-certificate argument ---
     - name: Install or upgrade Nginx ingress controller
       ansible.builtin.command: >
         helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx
@@ -105,7 +104,6 @@
         --set controller.extraArgs.default-ssl-certificate=default/ingress-tls
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
-    # --------------------------------------------------------
 
     - name: Wait for ingress controller pods to be ready
       ansible.builtin.command: >
@@ -212,12 +210,20 @@
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
 
-    - name: Install Istio demo profile
+    # --- FIXED ISTIO IP CONFIGURATION START ---
+    - name: Copy Istio configuration to VM
+      ansible.builtin.copy:
+        src: istio-config.yaml
+        dest: /tmp/istio-config.yaml
+        mode: '0644'
+
+    - name: Install Istio with fixed IP configuration
       ansible.builtin.command: >
-        /vagrant/istio-{{ istio_version }}/bin/istioctl install --set profile=demo -y
+        /vagrant/istio-{{ istio_version }}/bin/istioctl install -y -f /tmp/istio-config.yaml
       when: istio_ns.rc != 0
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
+    # --- FIXED ISTIO IP CONFIGURATION END ---
 
     - name: Wait for Istio control plane to be ready
       ansible.builtin.command: >
