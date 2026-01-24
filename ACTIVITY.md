@@ -133,3 +133,7 @@ This week, I have cleaned up the README.md documentation, addressing visible rep
 
 - Miroslav: https://github.com/doda25-team19/app/pull/13
 While implementing the sticky session in the previous weeks, it was rather inconvenient to test, since the response didn't contain any information about the version, and I had to manually look at the logs of the app. I made a change to the endpoint, but then ran into issues with the lack of authorization of docker when pull lib-version from github. This is also fixed in this PR.
+
+### Week Q2.9
+- Arda: https://github.com/doda25-team19/operation/pull/33
+  Updated the deployment documentation to include sticky sessions and rate limiting. Updated the extension proposal with concrete Flagger configurations, metric-driven decision criteria, and an objective experiment design.
