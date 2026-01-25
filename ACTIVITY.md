@@ -146,4 +146,8 @@ While implementing the sticky session in the previous weeks, it was rather incon
   Implemented global HTTPS for the Nginx Ingress Controller using pre-provided certificates and configured the Istio Gateway with a fixed IP address
 
 - Mikolaj: https://github.com/doda25-team19/operation/pull/35 
-This week I worked on satisfying the "Excellent" criteria for A3 by adding a second non-time-series visualization to the Grafana dashboard. 
+This week I worked on satisfying the "Excellent" criteria for A3 by adding a second non-time-series visualization to the Grafana dashboard.
+
+- Benas: https://github.com/doda25-team19/operation/pull/36
+This week, I addressed the README.md issues and made it cleaner + less repetitive. I also worked on potential issues with SSH keys according to our feedback, but ultimately, these issues seemed to already have been patched earlier, so no PR was needed.
+
