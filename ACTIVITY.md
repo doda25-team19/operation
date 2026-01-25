@@ -141,3 +141,6 @@ While implementing the sticky session in the previous weeks, it was rather incon
 - Jeroen: https://github.com/doda25-team19/operation/pull/34
   This week I worked on the rubric point: "The model service can be relocated just by changing the Kubernetes config."
   I also reviewed and help merging PRs from other team members. Plannning to wrap up any remaining tasks. And finalizing this project.
+
+- Viktor https://github.com/doda25-team19/operation/pull/31 https://github.com/doda25-team19/operation/pull/32
+  Implemented global HTTPS for the Nginx Ingress Controller using pre-provided certificates and configured the Istio Gateway with a fixed IP address
