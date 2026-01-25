@@ -132,16 +132,7 @@ Run these commands to verify that the Kubernetes usage requirements have been me
 
 ---
 
-## Monitoring
-
-### Setup (Minikube)
-```bash
-minikube start
-minikube addons enable ingress
-kubectl get pods -n ingress-nginx -w  # Wait for ready
-cd helm/doda-app
-```
-### Appendix: Local Development with Minikube & Troubleshooting
+### 5. Local Development with Minikube & Troubleshooting (Optional)
 
 If you are testing locally without the A2 cluster or are facing networking issues on macOS, you can use Minikube.
 
@@ -153,7 +144,9 @@ If you are testing locally without the A2 cluster or are facing networking issue
     # Enable the ingress addon
     minikube addons enable ingress
     ```
-2.  **Follow the main installation steps above.**
+
+2.  **Deploy the application using Helm:**
+    Follow the steps in **Assignment 3 – Deploying the Application Stack**
 
 3.  **Test Connectivity (Minikube on macOS):**
 
@@ -170,18 +163,18 @@ If you are testing locally without the A2 cluster or are facing networking issue
 
 ---
 
-## Istio Rate Limiting
+### 6. Istio Rate Limiting
 
 Per-IP rate limiting (5 req/min) on model-service using Istio EnvoyFilter with token bucket algorithm. Returns HTTP 429 when limit exceeded.
 
-### Verification
+#### Verification
 
 ```bash
 kubectl get pods  # Should show 2/2 containers (app + istio-proxy)
 kubectl get virtualservice,destinationrule,envoyfilter
 ```
 
-### Testing Rate Limiting
+#### Testing Rate Limiting
 
 **Test 1: Basic Rate Limiting**
 
@@ -228,7 +221,7 @@ curl -X POST http://doda-app.local/predict \
 
 Different client IPs have independent quotas. If you have access to multiple machines or can use different source IPs, verify that rate limiting is isolated per IP.
 
-### Viewing Envoy Metrics
+#### Viewing Envoy Metrics
 
 Check Istio's rate limiting metrics from the Envoy proxy:
 ```bash
@@ -245,7 +238,7 @@ Look for metrics like:
 - `envoy_local_rate_limit_enforced`
 - `envoy_http_local_rate_limit_rate_limited`
 
-### Configuration
+#### Configuration
 
 Rate limiting settings are configurable in `values.yaml`:
 
@@ -280,7 +273,7 @@ istio:
     fillInterval: 120
 ```
 
-### Disabling Rate Limiting
+#### Disabling Rate Limiting
 
 To disable rate limiting without removing Istio:
 ```yaml
@@ -301,7 +294,7 @@ istio:
 
 Then upgrade the Helm release.
 
-### Troubleshooting
+#### Troubleshooting
 
 **Issue:** Pods show 1/1 containers instead of 2/2
 - **Cause:** Istio sidecar injection is not working
