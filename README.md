@@ -53,6 +53,11 @@ The `doda-app` Helm chart will deploy the application, Prometheus (for metrics),
     ```
     *(If you need to update an existing deployment, use `helm upgrade` instead.)*
 
+    **Custom hostname for grading:**
+    ```bash
+    helm install doda-app-release . --set hostname="my-grading-url.local"
+    ```
+
 ### 2. Accessing the Application
 
 #### Frontend Application
@@ -127,24 +132,6 @@ Run these commands to verify that the Kubernetes usage requirements have been me
 
 ---
 
-## Application Deployment (Helm Chart)
-
-### Installation
-
-```bash
-cd operation/helm/doda-app
-helm install doda-app-release .              # Install
-helm upgrade doda-app-release . -f values.yaml  # Upgrade
-helm uninstall doda-app-release              # Uninstall
-```
-
-**Custom hostname for grading:**
-```bash
-helm install doda-app-release . --set hostname="my-grading-url.local"
-```
-
----
-
 ## Monitoring
 
 ### Setup (Minikube)
@@ -153,7 +140,7 @@ minikube start
 minikube addons enable ingress
 kubectl get pods -n ingress-nginx -w  # Wait for ready
 cd helm/doda-app
-
+```
 ### Appendix: Local Development with Minikube & Troubleshooting
 
 If you are testing locally without the A2 cluster or are facing networking issues on macOS, you can use Minikube.
@@ -180,14 +167,6 @@ If you are testing locally without the A2 cluster or are facing networking issue
     curl -H "Host: doda-app.local" http://127.0.0.1:XXXXX
     curl -H "Host: metrics.doda-app.local" http://127.0.0.1:XXXXX/metrics
     ```
-
-# Install or upgrade
-helm install doda-app . -f values.yaml    # First time
-helm upgrade doda-app . -f values.yaml    # Update
-
-# Verify
-kubectl get pods,servicemonitor,ingress,prometheusrule
-```
 
 ---
 
