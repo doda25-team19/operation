@@ -192,9 +192,9 @@
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
 
-    - name: Install Istio demo profile
+    - name: Install Istio with fixed gateway IP
       ansible.builtin.command: >
-        /vagrant/istio-{{ istio_version }}/bin/istioctl install --set profile=demo -y
+        /vagrant/istio-{{ istio_version }}/bin/istioctl install -y -f /vagrant/k8s/istio-config.yaml
       when: istio_ns.rc != 0
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
