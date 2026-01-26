@@ -4,8 +4,7 @@ services:
     environment:
       - MODEL_PORT=${MODEL_PORT}
       - MODEL_FILE=output/model.joblib
-      - MODEL_FILE_NAME=model.joblib
-      - MODEL_URL = https://github.com/doda25-team19/model-service/releases/download/v${MODEL_VERSION}/
+      - MODEL_URL=https://github.com/doda25-team19/model-service/releases/download/v${MODEL_VERSION}/model.joblib
     expose:
       - "${MODEL_PORT}"
     volumes:
