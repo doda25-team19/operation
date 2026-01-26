@@ -29,7 +29,7 @@ spec:
         - name: MODEL_HOST
           value: "http://model-service:80"
         - name: APP_VERSION
-          value: new
+          value: canary
         envFrom:
         - configMapRef:
             name: {{ .Release.Name }}-configmap
@@ -41,4 +41,4 @@ spec:
             memory: 128Mi
           limits:
             cpu: 500m
-            memory: 512Mi          
+            memory: 512Mi
