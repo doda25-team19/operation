@@ -7,8 +7,7 @@
     metallb_manifest_url: "https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml"
     metallb_pool_file: "/tmp/metallb-ip-pool.yml"
     istio_version: "1.25.2"
-    istio_dir: "/vagrant/istio-1.25.2"
-    istio_archive: "/vagrant/istio-1.25.2-linux-amd64.tar.gz"
+    istio_dir: "/home/vagrant/istio-{{ istio_version }}"
 
   tasks:
     - name: Install MetalLB CRDs and controller
@@ -153,24 +152,31 @@
         KUBECONFIG: /home/vagrant/.kube/config
 
 
+    - name: Detect architecture and set Istio paths
+      ansible.builtin.set_fact:
+        istio_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
+        istio_archive: "/home/vagrant/istio-{{ istio_version }}-linux-{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}.tar.gz"
+
     - name: Download Istio archive
       ansible.builtin.get_url:
-        url: "https://github.com/istio/istio/releases/download/{{ istio_version }}/istio-{{ istio_version }}-linux-amd64.tar.gz"
+        url: "https://github.com/istio/istio/releases/download/{{ istio_version }}/istio-{{ istio_version }}-linux-{{ istio_arch }}.tar.gz"
         dest: "{{ istio_archive }}"
         mode: "0644"
 
     - name: Unpack Istio
       ansible.builtin.unarchive:
         src: "{{ istio_archive }}"
-        dest: /vagrant
+        dest: /home/vagrant
         remote_src: yes
+        owner: vagrant
+        group: vagrant
 
     - name: Ensure istioctl is on vagrant PATH
       become: yes
       become_user: vagrant
       ansible.builtin.lineinfile:
         path: /home/vagrant/.bashrc
-        line: 'export PATH=$PATH:/vagrant/istio-{{ istio_version }}/bin'
+        line: 'export PATH=$PATH:{{ istio_dir }}/bin'
         insertafter: EOF
         state: present
         create: yes
@@ -187,14 +193,14 @@
 
     - name: Run istioctl precheck
       ansible.builtin.command: >
-        /vagrant/istio-{{ istio_version }}/bin/istioctl x precheck
+        {{ istio_dir }}/bin/istioctl x precheck
       when: istio_ns.rc != 0
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
 
     - name: Install Istio with fixed gateway IP
       ansible.builtin.command: >
-        /vagrant/istio-{{ istio_version }}/bin/istioctl install -y -f /vagrant/k8s/istio-config.yaml
+        {{ istio_dir }}/bin/istioctl install -y -f /vagrant/k8s/istio-config.yaml
       when: istio_ns.rc != 0
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
