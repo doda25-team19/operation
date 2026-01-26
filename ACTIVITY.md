@@ -105,18 +105,10 @@ Added Kubernetes resource requests and limits for the model-service deployments,
 - Miroslav: https://github.com/doda25-team19/model-service/pull/5
 Tested the model release workflow since I didn't manage to do it previously. It turned out to be fine, so no changes on that. Added documentation for the model training and releasing as well as how to test the model.
 
-- Benas: https://github.com/doda25-team19/app/pull/12 https://github.com/doda25-team19/model-service/pull/6
-This week, I implemented A1-F4: adding multi-architecture support for amd64 and arm64.
-
 - Viktor: https://github.com/doda25-team19/operation/pull/28 worked on the experiment and the dashboards
-
-- Miroslav: https://github.com/doda25-team19/model-service/pull/5
-Tested the model release workflow since I didn't manage to do it previously. It turned out to be fine, so no changes on that. Added documentation for the model training and releasing as well as how to test the model.
 
 - Benas: https://github.com/doda25-team19/app/pull/12 https://github.com/doda25-team19/model-service/pull/6
 This week, I implemented A1-F4: adding multi-architecture support for amd64 and arm64.
-
-- Viktor: https://github.com/doda25-team19/operation/pull/28 worked on the experiment and the dashboards
 
 - Jeroen: https://github.com/doda25-team19/app/pull/11
 This week I worked on A3 Application Instrumentation enhancements. I added Spring Boot Actuator and Micrometer Prometheus integration to expose custom Counter and Gauge metrics via the /actuator/prometheus endpoint. The application now tracks prediction success/error counters and input text length as a gauge, ensuring proper Prometheus scraping and resolving the "Whitelabel error page" issue with the metrics endpoint.
@@ -150,4 +142,14 @@ This week I worked on satisfying the "Excellent" criteria for A3 by adding a sec
 
 - Benas: https://github.com/doda25-team19/operation/pull/36
 This week, I addressed the README.md issues and made it cleaner + less repetitive. I also worked on potential issues with SSH keys according to our feedback, but ultimately, these issues seemed to already have been patched earlier, so no PR was needed.
+
+- Miroslav:
+  PRs:
+    - https://github.com/doda25-team19/model-service/pull/7
+    - https://github.com/doda25-team19/lib-version/pull/5
+    - https://github.com/doda25-team19/app/pull/14
+
+  This week, I worked fixing some of the stuff that we have missed out on in the previous weeks, namely how we obtain the versions for the releases. Updated from tags -> a source in repo. 
+  Additionally, I fixed some of the workflows that weren't working after the merging changes.
+  Finally, I managed to resolve the issue with docker not being able to get access to the lib-version package.
 
