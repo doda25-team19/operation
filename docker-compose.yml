@@ -5,6 +5,7 @@ services:
       - MODEL_PORT=${MODEL_PORT}
       - MODEL_FILE=output/model.joblib
       - MODEL_URL=https://github.com/doda25-team19/model-service/releases/download/v${MODEL_VERSION}/model.joblib
+      - PREPROCESSOR_URL=https://github.com/doda25-team19/model-service/releases/download/v${MODEL_VERSION}/preprocessor.joblib
     expose:
       - "${MODEL_PORT}"
     volumes:
