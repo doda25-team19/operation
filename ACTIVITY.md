@@ -157,3 +157,6 @@ This week, I addressed the README.md issues and made it cleaner + less repetitiv
 
  - Miroslav: https://github.com/doda25-team19/operation/pull/38
  update the docker-compose to accomodate the most recent changes
+
+ - Jeroen: https://github.com/doda25-team19/operation/pull/39
+ finalized the the project and implemented rate limiting. 
