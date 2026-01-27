@@ -16,7 +16,9 @@ appService:
 # Settings for the Model Service (backend)
 modelService:
   replicaCount: 1
-  image: "ghcr.io/doda25-team19/model-service:latest"
+  image: "ghcr.io/doda25-team19/model-service:v0.0.7"
+  modelVersion: 0.0.1-test
+  modelFile: 'output/model.joblib'
   service:
     port: 8081
 # This is for the private registry secret.

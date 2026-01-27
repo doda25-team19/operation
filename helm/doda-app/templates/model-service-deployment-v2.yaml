@@ -36,8 +36,12 @@ spec:
               cpu: "500m"
           imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
           env:
-            - name: MODEL_FILE
-              value: "{{ .Values.modelService.modelFile }}"
+          - name: MODEL_FILE
+            value: "{{ .Values.modelService.modelFile }}"
+          - name: MODEL_URL
+            value: "https://github.com/doda25-team19/model-service/releases/download/v{{ .Values.modelService.modelVersion }}/model.joblib"
+          - name: PREPROCESSOR_URL
+            value: "https://github.com/doda25-team19/model-service/releases/download/v{{ .Values.modelService.modelVersion }}/preprocessor.joblib"
           ports:
             - containerPort: {{ .Values.modelService.service.port }}
           volumeMounts:
