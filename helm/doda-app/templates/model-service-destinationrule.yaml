@@ -1,14 +1,20 @@
 {{- if .Values.istio.enabled }}
+# =============================================================================
+# MODEL-SERVICE DESTINATIONRULE - Subset Definitions for Version Routing
+# =============================================================================
+# Defines subsets (stable/canary) used by VirtualService for header-based routing.
+# Routing is determined by x-app-version header (injected by EnvoyFilter).
+#
+# Subsets map to pod labels:
+#   - stable → version: v1-stable
+#   - canary → version: v2-canary
+# =============================================================================
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: model-service-destinationrule
 spec:
   host: model-service
-  trafficPolicy:
-    loadBalancer:
-      consistentHash:
-        httpHeaderName: "x-user-id"
   subsets:
     - name: stable
       labels:

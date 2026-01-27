@@ -1,4 +1,18 @@
 {{- if .Values.istio.enabled }}
+# =============================================================================
+# APP-SERVICE VIRTUALSERVICE - Entry Point with 90/10 Canary Split
+# =============================================================================
+# DYNAMIC ROUTING DECISION: 90/10 weighted split happens HERE
+#
+# This is the primary routing decision point for external traffic.
+# DestinationRule defines subsets (stable/canary) with consistentHash
+# for sticky sessions based on x-user-id header.
+#
+# Traffic Flow:
+#   1. External request → Gateway → THIS VirtualService
+#   2. ROUTING DECISION: 90% → stable (v1), 10% → canary (v2)
+#   3. DestinationRule ensures consistent routing per user (sticky sessions)
+# =============================================================================
 apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
@@ -8,7 +22,7 @@ spec:
     - {{ .Values.hostname | quote }}
   gateways:
     - {{ .Release.Name }}-gateway
-    
+
   http:
     # Simple canary route for testing
     - match:
@@ -22,8 +36,13 @@ spec:
             port:
               number: {{ .Values.appService.service.port }}
 
-    # 90/10 canary split with sticky sessions
+    # ==========================================================================
+    # DYNAMIC ROUTING DECISION: 90/10 canary split
+    # ==========================================================================
+    # 90% of traffic → stable (v1-stable)
+    # 10% of traffic → canary (v2-canary)
     # The consistentHash in DestinationRule ensures users stick to their assigned version
+    # ==========================================================================
     - route:
         - destination:
             host: app-service

@@ -1,4 +1,21 @@
 {{- if .Values.istio.enabled }}
+# =============================================================================
+# MODEL-SERVICE VIRTUALSERVICE - Consistent Version Routing
+# =============================================================================
+# DYNAMIC ROUTING DECISION: None here - routing follows app-service version
+#
+# The 90/10 split happens at app-service-virtualservice (gateway level).
+# This VirtualService ensures model-service requests are routed to the
+# matching version based on the x-app-version header injected by the
+# EnvoyFilter on app-service pods.
+#
+# Traffic Flow:
+#   1. External request → Gateway → app-service VirtualService (90/10 SPLIT HERE)
+#   2. app-service v1-stable pod → EnvoyFilter adds "x-app-version: v1-stable"
+#   3. Request to model-service → This VirtualService routes to model-service stable
+#
+# Result: old-old (v1→v1) and new-new (v2→v2) routing, no mixing
+# =============================================================================
 apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:

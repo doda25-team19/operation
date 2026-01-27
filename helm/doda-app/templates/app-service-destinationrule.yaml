@@ -1,4 +1,14 @@
 {{- if .Values.istio.enabled }}
+# =============================================================================
+# APP-SERVICE DESTINATIONRULE - Subset Definitions & Load Balancing
+# =============================================================================
+# Defines subsets (stable/canary) used by VirtualService for 90/10 routing.
+# Uses consistentHash on x-user-id header for sticky sessions.
+#
+# Subsets map to pod labels:
+#   - stable → version: v1-stable
+#   - canary → version: v2-canary
+# =============================================================================
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
