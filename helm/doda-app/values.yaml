@@ -3,6 +3,7 @@
 hostname: "doda-app.local"
 prereleaseHostname: "prerelease.doda-app.local"
 metricsHostname: "metrics.doda-app.local"
+grafanaHostname: "grafana.doda-app.local"
 # Settings for the App Service (frontend/api)
 appService:
   replicaCount: 1
@@ -68,7 +69,7 @@ grafana:
       datasources:
         - name: Prometheus
           type: prometheus
-          url: http://{{ .Release.Name }}-kube-prometheus-stack-prometheus.{{ .Release.Namespace }}.svc.cluster.local:9090
+          url: http://doda-app-kube-prometheus-s-prometheus:9090
           access: proxy
           isDefault: true
 

@@ -20,4 +20,7 @@ spec:
       {{- if .Values.metricsHostname }}
       - {{ .Values.metricsHostname | quote }}
       {{- end }}
+      {{- if .Values.grafanaHostname }}
+      - {{ .Values.grafanaHostname | quote }}
+      {{- end }}
 {{- end }}

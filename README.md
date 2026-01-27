@@ -21,7 +21,7 @@ This section details how to deploy the application stack to Kubernetes using Hel
 
 ### Prerequisites
 - A running Kubernetes cluster as provisioned in Assignment 2.
-- The `admin.conf` for your cluster is configured (e.g., via `export KUBECONFIG=$(pwd)/admin.conf`).
+- The `kubeconfig` for your cluster is configured (e.g., via `export KUBECONFIG=$(pwd)/kubeconfig`).
 
 ### 1. Deploying the Application Stack
 
@@ -83,15 +83,22 @@ The `doda-app` Helm chart will deploy the application, Prometheus (for metrics),
 
 #### Accessing Grafana
 
-1.  **Forward the Grafana Port:**
-    The easiest way to access the Grafana UI is via port-forwarding.
-    ```bash
-    # This command will continue running. Keep the terminal open.
-    kubectl port-forward svc/doda-app-release-grafana 3000:80
-    ```
+1.  **Access via Istio Ingress (recommended):**
+  Map the Istio Ingress IP to the Grafana hostname and open it in your browser.
+  ```
+  # Replace <ISTIO-INGRESS-IP> with the EXTERNAL-IP of istio-ingressgateway
+  <ISTIO-INGRESS-IP> grafana.doda-app.local
+  ```
+  Open **http://grafana.doda-app.local**.
 
-2.  **Open in Browser:**
-    You can now access Grafana at **http://localhost:3000**.
+  *Hostname is configurable via `grafanaHostname` in [helm/doda-app/values.yaml](helm/doda-app/values.yaml).* 
+
+2.  **Fallback (port-forward):**
+  ```bash
+  # This command will continue running. Keep the terminal open.
+  kubectl port-forward svc/doda-app-release-grafana 3000:80
+  ```
+  Then open **http://localhost:3000**.
 
 ### 3. Monitoring with Prometheus & Grafana
 
