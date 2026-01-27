@@ -47,9 +47,11 @@ istio:
     enabled: false
   rateLimiting:
     enabled: true
+    mode: local
     requestsPerMinute: 5
     burstSize: 5
     fillInterval: 60
+    targetApp: app-service
   gateway:
     name: ingressgateway
     namespace: istio-system
@@ -84,6 +86,11 @@ prometheus:
   enabled: true
 
 kube-prometheus-stack:
+  prometheusOperator:
+    admissionWebhooks:
+      patch:
+        podAnnotations:
+          sidecar.istio.io/inject: "false"
   grafana:
     enabled: false
   prometheus:

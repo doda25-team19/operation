@@ -1,0 +1,25 @@
+{{- if and .Values.istio.rateLimiting.enabled (eq .Values.istio.rateLimiting.mode "global") }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-ratelimit-redis
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-ratelimit-redis
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-ratelimit-redis
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+        - name: redis
+          image: {{ .Values.istio.rateLimiting.redis.image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: {{ .Values.istio.rateLimiting.redis.port }}
+{{- end }}

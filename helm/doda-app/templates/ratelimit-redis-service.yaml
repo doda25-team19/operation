@@ -1,0 +1,14 @@
+{{- if and .Values.istio.rateLimiting.enabled (eq .Values.istio.rateLimiting.mode "global") }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.istio.rateLimiting.redis.host }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+    - name: redis
+      port: {{ .Values.istio.rateLimiting.redis.port }}
+      targetPort: {{ .Values.istio.rateLimiting.redis.port }}
+  selector:
+    app: {{ .Release.Name }}-ratelimit-redis
+{{- end }}

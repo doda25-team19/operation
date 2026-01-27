@@ -170,152 +170,30 @@ If you are testing locally without the A2 cluster or are facing networking issue
 
 ---
 
-### 6. Istio Rate Limiting
+### 6. Istio Rate Limiting (Concise)
 
-Per-IP rate limiting (5 req/min) on model-service using Istio EnvoyFilter with token bucket algorithm. Returns HTTP 429 when limit exceeded.
+Rate limiting (5 req/min) is enforced at the Istio IngressGateway via EnvoyFilter. When the token bucket is exhausted, responses return HTTP 429.
 
-#### Verification
-
+**Quick test (burst):**
 ```bash
-kubectl get pods  # Should show 2/2 containers (app + istio-proxy)
-kubectl get virtualservice,destinationrule,envoyfilter
-```
-
-#### Testing Rate Limiting
-
-**Test 1: Basic Rate Limiting**
-
-Send 7 requests quickly to observe rate limiting in action:
-```bash
-for i in {1..7}; do
-  curl -X POST http://doda-app.local/predict \
+for i in {1..20}; do
+  curl -X POST http://doda-app.local/sms/ \
     -H "Content-Type: application/json" \
     -d '{"sms":"test message"}' \
     -w "\nStatus: %{http_code}\n"
-  sleep 1
 done
 ```
 
-**Expected Result:**
-- Requests 1-5: HTTP 200 (success)
-- Requests 6-7: HTTP 429 (rate limited)
+**Expected result:** You will see a mix of HTTP 200 and 429 responses once the bucket is exhausted (token refill timing makes the order non-deterministic).
 
-**Test 2: Token Bucket Refill**
-
-Verify that rate limits reset after the fill interval:
+**Config:**
+Edit `helm/doda-app/values.yaml` → `istio.rateLimiting.burstSize` and `fillInterval`, then:
 ```bash
-# Hit the rate limit
-for i in {1..6}; do
-  curl -X POST http://doda-app.local/predict \
-    -H "Content-Type: application/json" \
-    -d '{"sms":"test"}' -s -o /dev/null
-done
-
-# Wait for token bucket to refill
-echo "Waiting 60 seconds for token refill..."
-sleep 60
-
-# Try again - should succeed
-curl -X POST http://doda-app.local/predict \
-  -H "Content-Type: application/json" \
-  -d '{"sms":"test message"}' \
-  -w "\nStatus: %{http_code}\n"
+cd helm/doda-app
+helm upgrade doda-app . -f values.yaml
 ```
 
-**Expected Result:** After 60 seconds, the request succeeds (HTTP 200)
-
-**Test 3: Per-IP Isolation**
-
-Different client IPs have independent quotas. If you have access to multiple machines or can use different source IPs, verify that rate limiting is isolated per IP.
-
-#### Viewing Envoy Metrics
-
-Check Istio's rate limiting metrics from the Envoy proxy:
-```bash
-# Get the model-service pod name
-MODEL_POD=$(kubectl get pod -l app=model-service -o jsonpath="{.items[0].metadata.name}")
-
-# View rate limiting metrics
-kubectl exec -it $MODEL_POD -c istio-proxy -- \
-  curl localhost:15000/stats/prometheus | grep local_rate_limit
-```
-
-Look for metrics like:
-- `envoy_local_rate_limit_enabled`
-- `envoy_local_rate_limit_enforced`
-- `envoy_http_local_rate_limit_rate_limited`
-
-#### Configuration
-
-Rate limiting settings are configurable in `values.yaml`:
-
-```yaml
-istio:
-  enabled: true  # Enable/disable Istio features
-  sidecarInjection:
-    enabled: true  # Enable sidecar injection
-  rateLimiting:
-    enabled: true  # Enable rate limiting
-    requestsPerMinute: 5  # Not used directly (kept for clarity)
-    burstSize: 5  # Maximum tokens in bucket
-    fillInterval: 60  # Token refill interval in seconds
-```
-
-**To adjust rate limits:**
-
-1. Edit `helm/doda-app/values.yaml`
-2. Modify `istio.rateLimiting.burstSize` (max requests) or `fillInterval` (refill period)
-3. Upgrade the Helm release:
-   ```bash
-   cd helm/doda-app
-   helm upgrade doda-app . -f values.yaml
-   ```
-4. Wait for pods to restart with updated configuration
-
-**Example:** To allow 10 requests per 2 minutes:
-```yaml
-istio:
-  rateLimiting:
-    burstSize: 10
-    fillInterval: 120
-```
-
-#### Disabling Rate Limiting
-
-To disable rate limiting without removing Istio:
-```yaml
-istio:
-  rateLimiting:
-    enabled: false
-```
-
-To disable all Istio features:
-```yaml
-istio:
-  enabled: false
-  sidecarInjection:
-    enabled: false
-  rateLimiting:
-    enabled: false
-```
-
-Then upgrade the Helm release.
-
-#### Troubleshooting
-
-**Issue:** Pods show 1/1 containers instead of 2/2
-- **Cause:** Istio sidecar injection is not working
-- **Solution:** Ensure Istio is installed: `kubectl get pods -n istio-system`
-- **Solution:** Check deployment annotations: `kubectl get deployment model-service -o yaml | grep sidecar.istio.io/inject`
-
-**Issue:** Rate limiting not working (all requests succeed)
-- **Cause:** EnvoyFilter not applied
-- **Solution:** Check if EnvoyFilter exists: `kubectl get envoyfilter`
-- **Solution:** Check Envoy configuration: `kubectl exec -it $MODEL_POD -c istio-proxy -- curl localhost:15000/config_dump | grep local_rate_limit`
-
-**Issue:** All requests return HTTP 429 immediately
-- **Cause:** Rate limit configuration too restrictive or misconfigured
-- **Solution:** Check values.yaml settings and ensure `burstSize` and `fillInterval` are reasonable
+**Disable:** set `istio.rateLimiting.enabled: false` and upgrade.
 
 
 ## Assignment 2: Provisioning a Kubernetes Cluster
