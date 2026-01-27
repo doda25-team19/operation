@@ -5,6 +5,7 @@ metadata:
   name: {{ .Release.Name }}-app-service-metrics
   labels:
     app: doda-app
+    release: {{ .Release.Name }}
     app.kubernetes.io/name: {{ .Chart.Name }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
@@ -13,6 +14,8 @@ spec:
   selector:
     matchLabels:
       app: app-service  # match the labels in app-service-service.yaml
+  podTargetLabels:
+    - version
   endpoints:
     - port: http        # match the port name in app-service-service.yaml
       path: /metrics

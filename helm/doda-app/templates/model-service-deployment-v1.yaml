@@ -25,25 +25,21 @@ spec:
             path: {{ .Values.sharedVolume.hostPath }}
 
       containers:
-        - name: model-service
-          image: "{{ .Values.modelService.image }}"
-          resources:
-            requests:
-              memory: "64Mi"
-              cpu: "100m"
-            limits:
-              memory: "256Mi"
-              cpu: "500m"
-          imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
-          env:
-            - name: MODEL_FILE
-              value: "{{ .Values.modelService.modelFile }}"
-            {{- with .Values.modelService.modelUrl }}
-            - name: MODEL_URL
-              value: "{{ . }}"
-            {{- end }}
-          ports:
-            - containerPort: {{ .Values.modelService.service.port }}
-          volumeMounts:
-            - name: shared-data-volume
-              mountPath: {{ .Values.sharedVolume.mountPath }}
+      - name: model-service
+        image: "{{ .Values.modelService.image }}"
+        ports:
+        - containerPort: {{ .Values.modelService.service.port }}
+        env:
+        - name: MODEL_FILE
+          value: "{{ .Values.modelService.modelFile }}"
+        - name: MODEL_URL
+          value: "https://github.com/doda25-team19/model-service/releases/download/v{{ .Values.modelService.modelVersion }}/model.joblib"
+        - name: PREPROCESSOR_URL
+          value: "https://github.com/doda25-team19/model-service/releases/download/v{{ .Values.modelService.modelVersion }}/preprocessor.joblib"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
