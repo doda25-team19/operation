@@ -27,7 +27,7 @@ spec:
         - name: MODEL_SERVICE_URL
           value: {{ .Values.appService.modelServiceUrl | quote }}
         - name: MODEL_HOST
-          value: "http://model-service:80"
+          value: {{ .Values.appService.modelServiceUrl | quote }}
         - name: APP_VERSION
           value: canary
         envFrom:
