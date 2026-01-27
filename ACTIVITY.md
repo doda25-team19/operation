@@ -153,3 +153,7 @@ This week, I addressed the README.md issues and made it cleaner + less repetitiv
   Additionally, I fixed some of the workflows that weren't working after the merging changes.
   Finally, I managed to resolve the issue with docker not being able to get access to the lib-version package.
 
+### Week Q2.10
+
+ - Miroslav: https://github.com/doda25-team19/operation/pull/38
+ update the docker-compose to accomodate the most recent changes
