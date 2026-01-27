@@ -10,6 +10,18 @@ spec:
     - {{ .Release.Name }}-gateway
     
   http:
+    # Simple canary route for testing
+    - match:
+        - headers:
+            x-user-id:
+              exact: "user-canary"
+      route:
+        - destination:
+            host: app-service
+            subset: canary
+            port:
+              number: {{ .Values.appService.service.port }}
+
     # 90/10 canary split with sticky sessions
     # The consistentHash in DestinationRule ensures users stick to their assigned version
     - route:
@@ -19,10 +31,18 @@ spec:
             port:
               number: {{ .Values.appService.service.port }}
           weight: 90
+          headers:
+            request:
+              add:
+                x-session-hash: "%REQ(x-user-id)%"
         - destination:
             host: app-service
             subset: canary
             port:
               number: {{ .Values.appService.service.port }}
           weight: 10
+          headers:
+            request:
+              add:
+                x-session-hash: "%REQ(x-user-id)%"
 {{- end }}

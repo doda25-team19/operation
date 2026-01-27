@@ -25,10 +25,17 @@ spec:
             path: {{ .Values.sharedVolume.hostPath }}
 
       containers:
-        - name: model-service
-          image: "{{ .Values.modelService.image }}"
-          ports:
-            - containerPort: {{ .Values.modelService.service.port }}
-          volumeMounts:
-            - name: shared-data-volume
-              mountPath: {{ .Values.sharedVolume.mountPath }}
+      - name: model-service
+        image: "{{ .Values.modelService.image }}"
+        ports:
+        - containerPort: {{ .Values.modelService.service.port }}
+        env:
+            - name: MODEL_FILE
+              value: "{{ .Values.modelService.modelFile }}"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi

@@ -90,6 +90,8 @@ Finalized A1/F10 - No hard-coded model. Implemented environment variable logic f
 - Viktor: https://github.com/doda25-team19/operation/pull/25
 Worked on the experiment docs for A4, had to fix the values.yaml to use correct images for both versions and include the prerelease hosting. Also created a new virtual-service-prerelease.yaml
 
+- Jeroen: this week I was sick (food poisoning) and couldn't contribute.
+
 - Miroslav: https://github.com/doda25-team19/operation/pull/20
 I managed to wrap up the PR from last week; there was a bug with the istio and nginx that were fighting for the same port and it took quite some digging to see the issue.
 
@@ -102,4 +104,52 @@ Added Kubernetes resource requests and limits for the model-service deployments,
 
 - Miroslav: https://github.com/doda25-team19/model-service/pull/5
 Tested the model release workflow since I didn't manage to do it previously. It turned out to be fine, so no changes on that. Added documentation for the model training and releasing as well as how to test the model.
+
+- Viktor: https://github.com/doda25-team19/operation/pull/28 worked on the experiment and the dashboards
+
+- Benas: https://github.com/doda25-team19/app/pull/12 https://github.com/doda25-team19/model-service/pull/6
+This week, I implemented A1-F4: adding multi-architecture support for amd64 and arm64.
+
+- Jeroen: https://github.com/doda25-team19/app/pull/11
+This week I worked on A3 Application Instrumentation enhancements. I added Spring Boot Actuator and Micrometer Prometheus integration to expose custom Counter and Gauge metrics via the /actuator/prometheus endpoint. The application now tracks prediction success/error counters and input text length as a gauge, ensuring proper Prometheus scraping and resolving the "Whitelabel error page" issue with the metrics endpoint.
+
+### Week Q2.8
+- Arda: https://github.com/doda25-team19/lib-version/pull/4
+Upgraded the CI/CD pipeline to automatically tag pre-release commits in order to have consistency between the released artifact version and the Git history. Made this to satisfy the "Excellent" criteria for A1.
+
+- Jeroen: https://github.com/doda25-team19/operation/pull/29
+Implemented A2 SSH host keys and HTTPS ingress. Added pre-generated server identity keys to prevent fingerprint warnings and configured TLS termination for the Kubernetes Dashboard.
+
+- Benas: https://github.com/doda25-team19/operation/pull/30
+This week, I have cleaned up the README.md documentation, addressing visible repetitions, inaccuracies and structure errors.
+
+- Miroslav: https://github.com/doda25-team19/app/pull/13
+While implementing the sticky session in the previous weeks, it was rather inconvenient to test, since the response didn't contain any information about the version, and I had to manually look at the logs of the app. I made a change to the endpoint, but then ran into issues with the lack of authorization of docker when pull lib-version from github. This is also fixed in this PR.
+
+### Week Q2.9
+- Arda: https://github.com/doda25-team19/operation/pull/33
+  Updated the deployment documentation to include sticky sessions and rate limiting. Updated the extension proposal with concrete Flagger configurations, metric-driven decision criteria, and an objective experiment design.
+
+- Jeroen: https://github.com/doda25-team19/operation/pull/34
+  This week I worked on the rubric point: "The model service can be relocated just by changing the Kubernetes config."
+  I also reviewed and help merging PRs from other team members. Plannning to wrap up any remaining tasks. And finalizing this project.
+
+- Viktor https://github.com/doda25-team19/operation/pull/31 https://github.com/doda25-team19/operation/pull/32
+  Implemented global HTTPS for the Nginx Ingress Controller using pre-provided certificates and configured the Istio Gateway with a fixed IP address
+
+- Mikolaj: https://github.com/doda25-team19/operation/pull/35 
+This week I worked on satisfying the "Excellent" criteria for A3 by adding a second non-time-series visualization to the Grafana dashboard.
+
+- Benas: https://github.com/doda25-team19/operation/pull/36
+This week, I addressed the README.md issues and made it cleaner + less repetitive. I also worked on potential issues with SSH keys according to our feedback, but ultimately, these issues seemed to already have been patched earlier, so no PR was needed.
+
+- Miroslav:
+  PRs:
+    - https://github.com/doda25-team19/model-service/pull/7
+    - https://github.com/doda25-team19/lib-version/pull/5
+    - https://github.com/doda25-team19/app/pull/14
+
+  This week, I worked fixing some of the stuff that we have missed out on in the previous weeks, namely how we obtain the versions for the releases. Updated from tags -> a source in repo. 
+  Additionally, I fixed some of the workflows that weren't working after the merging changes.
+  Finally, I managed to resolve the issue with docker not being able to get access to the lib-version package.
 

@@ -24,6 +24,8 @@ spec:
         ports:
         - containerPort: {{ .Values.appService.service.port }}
         env:
+        - name: MODEL_SERVICE_URL
+          value: {{ .Values.appService.modelServiceUrl | quote }}
         - name: MODEL_HOST
           value: "http://model-service:80"
         - name: APP_VERSION
@@ -39,4 +41,4 @@ spec:
             memory: 128Mi
           limits:
             cpu: 500m
-            memory: 512Mi          
+            memory: 512Mi

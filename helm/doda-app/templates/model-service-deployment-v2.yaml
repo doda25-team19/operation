@@ -27,6 +27,17 @@ spec:
       containers:
         - name: model-service
           image: "{{ .Values.modelService.image }}"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
+          env:
+            - name: MODEL_FILE
+              value: "{{ .Values.modelService.modelFile }}"
           ports:
             - containerPort: {{ .Values.modelService.service.port }}
           volumeMounts:

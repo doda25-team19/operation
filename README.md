@@ -38,7 +38,6 @@ The `doda-app` Helm chart will deploy the application, Prometheus (for metrics),
     helm dependency update
     ```
 
-
 3.  **Create SMTP Secret (for Alertmanager):**
     This secret is required by the Prometheus stack for sending alerts.
     ```bash
@@ -54,9 +53,14 @@ The `doda-app` Helm chart will deploy the application, Prometheus (for metrics),
     ```
     *(If you need to update an existing deployment, use `helm upgrade` instead.)*
 
-### 2. Accessing the Services (Ingress)
+    **Custom hostname for grading:**
+    ```bash
+    helm install doda-app-release . --set hostname="my-grading-url.local"
+    ```
 
-#### Accessing the Application
+### 2. Accessing the Application
+
+#### Frontend Application
 
 1.  **Find the Ingress IP Address:**
     Get the external IP address assigned to the Ingress Controller by MetalLB.
@@ -74,6 +78,8 @@ The `doda-app` Helm chart will deploy the application, Prometheus (for metrics),
 
 3.  **Open in Browser:**
     You can now access the application at **http://doda-app.local**.
+
+**Fallback (port-forward):** `kubectl port-forward svc/app-service 8080:80` then access **http://localhost:8080**
 
 #### Accessing Grafana
 
@@ -126,58 +132,7 @@ Run these commands to verify that the Kubernetes usage requirements have been me
 
 ---
 
-## Application Deployment (Helm Chart)
-
-### Installation
-
-```bash
-cd operation/helm/doda-app
-helm install doda-app-release .              # Install
-helm upgrade doda-app-release . -f values.yaml  # Upgrade
-helm uninstall doda-app-release              # Uninstall
-```
-
-**Custom hostname for grading:**
-```bash
-helm install doda-app-release . --set hostname="my-grading-url.local"
-```
-
-### Accessing the Application
-
-1. Get LoadBalancer IP: `kubectl get svc -n ingress-nginx`
-2. Add to `/etc/hosts`: `<EXTERNAL-IP> doda-app.local`
-3. Browse: http://doda-app.local
-
-**Fallback (port-forward):** `kubectl port-forward svc/app-service 8080:80` then access http://localhost:8080
-
-### Verification (Assignment A3)
-
-**ConfigMap & Secret Injection:**
-```bash
-APP_POD=$(kubectl get pod -l app=app-service -o jsonpath="{.items[0].metadata.name}")
-kubectl describe pod $APP_POD | grep -A5 "Environment Variables"
-# Should show doda-app-release-configmap and doda-app-release-secret
-```
-
-**HostPath Volume Mount:**
-```bash
-MODEL_POD=$(kubectl get pod -l app=model-service -o jsonpath="{.items[0].metadata.name}")
-kubectl describe pod $MODEL_POD | grep -A5 "Mounts"
-# Should show /data/shared mounted from shared-data-volume
-```
----
-## Monitoring
-
-### Setup (Minikube)
-```bash
-minikube start
-minikube addons enable ingress
-kubectl get pods -n ingress-nginx -w  # Wait for ready
-
-cd helm/doda-app
-helm dependency update
-
-### Appendix: Local Development with Minikube & Troubleshooting
+### 5. Local Development with Minikube & Troubleshooting (Optional)
 
 If you are testing locally without the A2 cluster or are facing networking issues on macOS, you can use Minikube.
 
@@ -189,9 +144,12 @@ If you are testing locally without the A2 cluster or are facing networking issue
     # Enable the ingress addon
     minikube addons enable ingress
     ```
-2.  **Follow the main installation steps above.**
+
+2.  **Deploy the application using Helm:**
+    Follow the steps in **Assignment 3 – Deploying the Application Stack**
 
 3.  **Test Connectivity (Minikube on macOS):**
+
     Due to Docker networking, you must use `minikube service` to get a temporary URL.
     ```bash
     minikube service -n ingress-nginx ingress-nginx-controller --url
@@ -203,42 +161,20 @@ If you are testing locally without the A2 cluster or are facing networking issue
     curl -H "Host: metrics.doda-app.local" http://127.0.0.1:XXXXX/metrics
     ```
 
-# Create alertmanager secret
-kubectl create secret generic alertmanager-email-secret \
-  --from-literal=password="password" -n default
-
-# Install or upgrade
-helm install doda-app . -f values.yaml    # First time
-helm upgrade doda-app . -f values.yaml    # Update
-
-# Verify
-kubectl get pods,servicemonitor,ingress,prometheusrule
-```
-
-### Testing (macOS/Minikube)
-```bash
-# Get minikube URL
-minikube service -n ingress-nginx ingress-nginx-controller --url
-
-# Test with first URL (HTTP port)
-curl -H "Host: doda-app.local" http://127.0.0.1:XXXXX
-curl -H "Host: metrics.doda-app.local" http://127.0.0.1:XXXXX/metrics
-```
-
 ---
 
-## Istio Rate Limiting
+### 6. Istio Rate Limiting
 
 Per-IP rate limiting (5 req/min) on model-service using Istio EnvoyFilter with token bucket algorithm. Returns HTTP 429 when limit exceeded.
 
-### Verification
+#### Verification
 
 ```bash
 kubectl get pods  # Should show 2/2 containers (app + istio-proxy)
 kubectl get virtualservice,destinationrule,envoyfilter
 ```
 
-### Testing Rate Limiting
+#### Testing Rate Limiting
 
 **Test 1: Basic Rate Limiting**
 
@@ -285,7 +221,7 @@ curl -X POST http://doda-app.local/predict \
 
 Different client IPs have independent quotas. If you have access to multiple machines or can use different source IPs, verify that rate limiting is isolated per IP.
 
-### Viewing Envoy Metrics
+#### Viewing Envoy Metrics
 
 Check Istio's rate limiting metrics from the Envoy proxy:
 ```bash
@@ -302,7 +238,7 @@ Look for metrics like:
 - `envoy_local_rate_limit_enforced`
 - `envoy_http_local_rate_limit_rate_limited`
 
-### Configuration
+#### Configuration
 
 Rate limiting settings are configurable in `values.yaml`:
 
@@ -337,7 +273,7 @@ istio:
     fillInterval: 120
 ```
 
-### Disabling Rate Limiting
+#### Disabling Rate Limiting
 
 To disable rate limiting without removing Istio:
 ```yaml
@@ -358,7 +294,7 @@ istio:
 
 Then upgrade the Helm release.
 
-### Troubleshooting
+#### Troubleshooting
 
 **Issue:** Pods show 1/1 containers instead of 2/2
 - **Cause:** Istio sidecar injection is not working
@@ -463,10 +399,18 @@ kubectl -n kubernetes-dashboard create token admin-user
 ```
 
 ## Assignment 1: Containerization
-We have implemented subtasks F1, F2, F3, F6, F7, F8, F11.
+In this assignment, we have successfully reorganized the SMS Checker project into 4 repositories:
+**model-service**
+**lib-version**
+**app**
+**operation**
+
+We have implemented all features required, extended the application and started maturing the release engineering practices.
 
 ### How to Run (Local Docker)
 To run the application containerized locally without Kubernetes:
 ```bash
 docker-compose up
 ```
+
+To access the frontend, open your browser at **http://localhost:8080/sms**
