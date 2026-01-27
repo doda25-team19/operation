@@ -55,6 +55,24 @@
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
 
+    # --- HTTPS INGRESS SETUP START ---
+    - name: Create default TLS secret for Ingress Controller
+      ansible.builtin.command: >
+        kubectl create secret tls ingress-tls
+        --cert=/vagrant/tls/tls.crt
+        --key=/vagrant/tls/tls.key
+        --namespace=default
+        --dry-run=client -o yaml
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+      register: default_tls_secret_yaml
+
+    - name: Apply default TLS secret
+      ansible.builtin.shell: |
+        echo '{{ default_tls_secret_yaml.stdout }}' | kubectl apply -f -
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+    # --- HTTPS INGRESS SETUP END ---
 
     - name: Add ingress nginx Helm repo
       ansible.builtin.command: >
@@ -83,6 +101,7 @@
         --create-namespace
         --set controller.service.type=LoadBalancer
         --set controller.service.loadBalancerIP=192.168.56.90
+        --set controller.extraArgs.default-ssl-certificate=default/ingress-tls
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
 
@@ -129,7 +148,7 @@
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
 
-    - name: Create TLS secret for HTTPS ingress
+    - name: Create TLS secret for HTTPS ingress (Dashboard Specific)
       ansible.builtin.command: >
         kubectl create secret tls dashboard-tls
         --cert=/vagrant/tls/tls.crt
@@ -140,7 +159,7 @@
         KUBECONFIG: /home/vagrant/.kube/config
       register: tls_secret_yaml
 
-    - name: Apply TLS secret
+    - name: Apply TLS secret (Dashboard Specific)
       ansible.builtin.shell: |
         echo '{{ tls_secret_yaml.stdout }}' | kubectl apply -f -
       environment:
@@ -151,7 +170,6 @@
         kubectl apply -f /vagrant/k8s/dashboard-ingress.yaml
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
-
 
     - name: Download Istio archive
       ansible.builtin.get_url:
@@ -192,12 +210,20 @@
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
 
-    - name: Install Istio demo profile
+    # --- FIXED ISTIO IP CONFIGURATION START ---
+    - name: Copy Istio configuration to VM
+      ansible.builtin.copy:
+        src: istio-config.yaml
+        dest: /tmp/istio-config.yaml
+        mode: '0644'
+
+    - name: Install Istio with fixed IP configuration
       ansible.builtin.command: >
-        /vagrant/istio-{{ istio_version }}/bin/istioctl install --set profile=demo -y
+        /vagrant/istio-{{ istio_version }}/bin/istioctl install -y -f /tmp/istio-config.yaml
       when: istio_ns.rc != 0
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
+    # --- FIXED ISTIO IP CONFIGURATION END ---
 
     - name: Wait for Istio control plane to be ready
       ansible.builtin.command: >
@@ -207,3 +233,4 @@
         --timeout=300s
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
+        
