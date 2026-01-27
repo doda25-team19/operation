@@ -6,21 +6,37 @@ metadata:
 spec:
   hosts:
     - model-service
-  
+
   http:
-    # 90/10 split matching the app-service routing
-    # The consistentHash ensures the same user gets routed to matching versions
+    # Route to stable model when called from v1-stable app-service
+    - match:
+        - headers:
+            x-app-version:
+              exact: "v1-stable"
+      route:
+        - destination:
+            host: model-service
+            subset: stable
+            port:
+              number: {{ .Values.modelService.service.port }}
+
+    # Route to canary model when called from v2-canary app-service
+    - match:
+        - headers:
+            x-app-version:
+              exact: "v2-canary"
+      route:
+        - destination:
+            host: model-service
+            subset: canary
+            port:
+              number: {{ .Values.modelService.service.port }}
+
+    # Default fallback (direct calls without header) - route to stable
     - route:
         - destination:
             host: model-service
             subset: stable
             port:
               number: {{ .Values.modelService.service.port }}
-          weight: 90
-        - destination:
-            host: model-service
-            subset: canary
-            port:
-              number: {{ .Values.modelService.service.port }}
-          weight: 10
 {{- end }}

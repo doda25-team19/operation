@@ -1,0 +1,65 @@
+{{- if .Values.istio.enabled }}
+# EnvoyFilter for v1-stable app-service
+# Injects x-app-version header on outbound requests for consistent version routing
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: app-service-v1-version-header
+spec:
+  workloadSelector:
+    labels:
+      app: app-service
+      version: v1-stable
+  configPatches:
+    - applyTo: HTTP_FILTER
+      match:
+        context: SIDECAR_OUTBOUND
+        listener:
+          filterChain:
+            filter:
+              name: "envoy.filters.network.http_connection_manager"
+              subFilter:
+                name: "envoy.filters.http.router"
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.lua
+          typed_config:
+            "@type": "type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua"
+            inlineCode: |
+              function envoy_on_request(request_handle)
+                request_handle:headers():add("x-app-version", "v1-stable")
+              end
+---
+# EnvoyFilter for v2-canary app-service
+# Injects x-app-version header on outbound requests for consistent version routing
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: app-service-v2-version-header
+spec:
+  workloadSelector:
+    labels:
+      app: app-service
+      version: v2-canary
+  configPatches:
+    - applyTo: HTTP_FILTER
+      match:
+        context: SIDECAR_OUTBOUND
+        listener:
+          filterChain:
+            filter:
+              name: "envoy.filters.network.http_connection_manager"
+              subFilter:
+                name: "envoy.filters.http.router"
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.lua
+          typed_config:
+            "@type": "type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua"
+            inlineCode: |
+              function envoy_on_request(request_handle)
+                request_handle:headers():add("x-app-version", "v2-canary")
+              end
+{{- end }}
