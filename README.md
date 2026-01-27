@@ -399,6 +399,18 @@ kubectl get nodes
 kubectl get pods -A
 ```
 
+### Access the Kubernetes Dashboard
+
+1. Add the host entry (on your host machine):
+  ```
+  192.168.56.90  dashboard.local
+  ```
+2. Open https://dashboard.local in your browser.
+3. Generate a login token:
+  ```bash
+  kubectl -n kubernetes-dashboard create token admin-user
+  ```
+
 ---
 ### Post-Provisioning Steps
 
