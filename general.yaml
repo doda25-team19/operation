@@ -1,4 +1,15 @@
 ---
+- name: Prepopulate SSH known_hosts
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Ensure cluster host keys are in known_hosts
+      ansible.builtin.known_hosts:
+        name: "{{ hostvars[item].ansible_host | default(item) }}"
+        key: "{{ hostvars[item].ansible_host | default(item) }} {{ lookup('file', 'ssh_host_keys/ssh_host_ed25519_key.pub') }}"
+        state: present
+      loop: "{{ groups['all'] }}"
+
 - name: General Kubernetes Setup
   hosts: all
   become: yes

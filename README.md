@@ -356,20 +356,26 @@ On macOS and Linux the file is at `/etc/hosts`
 
 These hostnames are used by the ingress rules deployed in the cluster.
 
-The `admin.conf` file (your cluster credentials) is automatically copied to your `operation` directory. To use `kubectl` from your host machine, you can either use the `--kubeconfig` flag or export the environment variable.
+The `kubeconfig` file (your cluster credentials) is available in the `operation` directory. To use `kubectl` from your host machine, you can either use the `--kubeconfig` flag or export the environment variable.
 
-**Option A (using a flag):**
 ```bash
-kubectl --kubeconfig ./admin.conf get nodes
-```
-
-**Option B (more convenient):**
-```bash
-export KUBECONFIG=$(pwd)/admin.conf
+export KUBECONFIG=$(pwd)/kubeconfig
 # Now you can run kubectl commands directly
 kubectl get nodes
 kubectl get pods -A
 ```
+
+### Access the Kubernetes Dashboard
+
+1. Add the host entry (on your host machine):
+  ```
+  192.168.56.90  dashboard.local
+  ```
+2. Open https://dashboard.local in your browser.
+3. Generate a login token:
+  ```bash
+  kubectl -n kubernetes-dashboard create token admin-user
+  ```
 
 ---
 ### Post-Provisioning Steps
