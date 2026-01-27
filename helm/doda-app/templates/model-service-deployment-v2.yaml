@@ -47,3 +47,7 @@ spec:
           volumeMounts:
             - name: shared-data-volume
               mountPath: {{ .Values.sharedVolume.mountPath }}
+            - name: shared-data-volume
+              mountPath: /output
+            - name: shared-data-volume
+              mountPath: /app/output

@@ -9,7 +9,7 @@ metricsHostname: "metrics.doda-app.local"
 appService:   
   replicaCount: 1
   image: "ghcr.io/doda25-team19/app:latest"
-  modelServiceUrl: "http://model-service:80" 
+  modelServiceUrl: "http://model-service:8081" 
   service:
     port: 80
     targetPort: 8080
@@ -40,7 +40,7 @@ appSecrets:
 
 # For mounting a shared folder into a pod
 sharedVolume:
-  hostPath: "/mnt/shared"
+  hostPath: "/vagrant/shared"
   mountPath: "/data/shared"
 
 # flag or nginx to not interfere with istio

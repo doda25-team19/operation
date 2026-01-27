@@ -21,7 +21,7 @@ This section details how to deploy the application stack to Kubernetes using Hel
 
 ### Prerequisites
 - A running Kubernetes cluster as provisioned in Assignment 2.
-- The `admin.conf` for your cluster is configured (e.g., via `export KUBECONFIG=$(pwd)/admin.conf`).
+- The `kubeconfig` for your cluster is configured (e.g., via `export KUBECONFIG=$(pwd)/kubeconfig`).
 
 ### 1. Deploying the Application Stack
 
