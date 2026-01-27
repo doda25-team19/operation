@@ -386,14 +386,8 @@ These hostnames are used by the ingress rules deployed in the cluster.
 
 The `admin.conf` file (your cluster credentials) is automatically copied to your `operation` directory. To use `kubectl` from your host machine, you can either use the `--kubeconfig` flag or export the environment variable.
 
-**Option A (using a flag):**
 ```bash
-kubectl --kubeconfig ./admin.conf get nodes
-```
-
-**Option B (more convenient):**
-```bash
-export KUBECONFIG=$(pwd)/admin.conf
+export KUBECONFIG=$(pwd)/kubeconfig
 # Now you can run kubectl commands directly
 kubectl get nodes
 kubectl get pods -A
