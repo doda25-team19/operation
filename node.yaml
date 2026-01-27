@@ -6,7 +6,7 @@
     - name: Ensure cluster host keys are in known_hosts
       ansible.builtin.known_hosts:
         name: "{{ hostvars[item].ansible_host | default(item) }}"
-        key: "{{ lookup('file', 'ssh_host_keys/ssh_host_ed25519_key.pub') }}"
+        key: "{{ hostvars[item].ansible_host | default(item) }} {{ lookup('file', 'ssh_host_keys/ssh_host_ed25519_key.pub') }}"
         state: present
       loop: "{{ groups['all'] }}"
 
