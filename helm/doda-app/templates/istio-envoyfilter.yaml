@@ -48,7 +48,7 @@ spec:
                 header:
                   key: x-local-rate-limit
                   value: 'true'
-            # Shared token bucket across connections
+            # Shared token bucket across all connections (global rate limit)
             local_rate_limit_per_downstream_connection: false
             enable_x_ratelimit_headers: DRAFT_VERSION_03
 {{- end }}

@@ -17,6 +17,22 @@
     controller_host: ctrl
 
   tasks:
+    - name: Check kubeadm is installed on controller
+      ansible.builtin.command: which kubeadm
+      delegate_to: "{{ controller_host }}"
+      register: kubeadm_check
+      changed_when: false
+      failed_when: false
+      run_once: true
+
+    - name: Fail if kubeadm is missing on controller
+      ansible.builtin.fail:
+        msg: >-
+          kubeadm not found on controller. Run general.yaml and ctrl.yaml on the
+          controller first, then re-run node.yaml.
+      when: kubeadm_check.rc != 0
+      run_once: true
+
     - name: Generate kubeadm join command on controller
       ansible.builtin.command: kubeadm token create --print-join-command
       delegate_to: "{{ controller_host }}"

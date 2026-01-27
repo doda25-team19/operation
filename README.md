@@ -170,9 +170,9 @@ If you are testing locally without the A2 cluster or are facing networking issue
 
 ---
 
-### 6. Istio Rate Limiting (Concise)
+### 6. Istio Rate Limiting
 
-Rate limiting (5 req/min) is enforced at the Istio IngressGateway via EnvoyFilter. When the token bucket is exhausted, responses return HTTP 429.
+Global rate limiting is enforced at the Istio IngressGateway via EnvoyFilter with a token bucket algorithm. All traffic to `/sms` shares a single token bucket. When the bucket is exhausted, responses return HTTP 429.
 
 **Quick test (burst):**
 ```bash
@@ -216,8 +216,17 @@ vagrant up
 **2. Join Worker Nodes to the Cluster:**
 This is the first manual step. It runs the `node.yaml` playbook, which makes the worker nodes securely join the controller.
 
+```bash 
+ansible-playbook -i inventory.cfg node.yaml
+```
+
+Run these in order from the operation directory if needed:
 ```bash
-ansible-playbook -i inventory.cfg node.yaml```
+
+ansible-playbook -i inventory.cfg general.yaml
+ansible-playbook -i inventory.cfg ctrl.yaml
+ansible-playbook -i inventory.cfg node.yaml
+```
 
 **3. Finalize the Cluster (Install MetalLB):**
 This is the second manual step. It runs the `finalization.yml` playbook to install and configure the MetalLB network load balancer.
@@ -282,11 +291,6 @@ kubectl apply -f k8s/model-service-service.yaml
 kubectl apply -f k8s/app-service-deployment.yaml
 kubectl apply -f k8s/app-service-service.yaml
 kubectl apply -f k8s/ingress.yaml
-```
-
-To log in generate a token.
-```bash
-kubectl -n kubernetes-dashboard create token admin-user
 ```
 
 ## Assignment 1: Containerization
