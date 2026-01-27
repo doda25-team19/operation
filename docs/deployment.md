@@ -69,4 +69,4 @@ To interact with the deployment, the following configuration is used:
 | **Hostname** | `doda-app.local` | Mapped in local `/etc/hosts` to the LoadBalancer IP. |
 | **Metrics** | `metrics.doda-app.local` | dedicated host for Prometheus scraping. |
 | **Dashboard** | `dashboard.local` | Kubernetes Dashboard (SSL enabled). |
-| **Model** | `http://model-service:80` | Internal DNS name used by the App to reach the Backend. |
+| **Model** | `http://model-service:8081` | Internal DNS name used by the App to reach the Backend. |
