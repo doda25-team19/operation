@@ -384,7 +384,7 @@ On macOS and Linux the file is at `/etc/hosts`
 
 These hostnames are used by the ingress rules deployed in the cluster.
 
-The `admin.conf` file (your cluster credentials) is automatically copied to your `operation` directory. To use `kubectl` from your host machine, you can either use the `--kubeconfig` flag or export the environment variable.
+The `kubeconfig` file (your cluster credentials) is available in the `operation` directory. To use `kubectl` from your host machine, you can either use the `--kubeconfig` flag or export the environment variable.
 
 ```bash
 export KUBECONFIG=$(pwd)/kubeconfig
