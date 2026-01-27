@@ -60,6 +60,10 @@ graph TD
         *   `stable` -> `version: v1-stable`
         *   `canary` -> `version: v2-canary`
 
+ 4. **Sticky Sessions (Session Persistence):**
+    * To ensure a consistent user experience during our continuous experiment, we implemented **Sticky Sessions** using Istio’s **Consistent Hashing**.
+    * The system uses the `x-user-id` HTTP header as the hash key. This ensures that a specific user is consistently bound to either the `stable` or `canary` version throughout their session, preventing them from seeing different versions on page reloads.
+
 ## 3. Configuration Details
 
 To interact with the deployment, the following configuration is used:
@@ -70,3 +74,10 @@ To interact with the deployment, the following configuration is used:
 | **Metrics** | `metrics.doda-app.local` | dedicated host for Prometheus scraping. |
 | **Dashboard** | `dashboard.local` | Kubernetes Dashboard (SSL enabled). |
 | **Model** | `http://model-service:80` | Internal DNS name used by the App to reach the Backend. |
+
+ ## 4. Additional Use Case: Local Rate Limiting
+
+ To protect the backend resources, we implemented **Rate Limiting** as our additional use case. 
+ * **Implementation:** This is applied to the `model-service` via an `EnvoyFilter` (defined in `istio-envoyfilter.yaml`).
+ * **Logic:** It restricts users to a token bucket defined by `burstSize` and `fillInterval` configured in `values.xml`. 
+ * **Effect:** If a user exceeds the limit, the filter returns a `429 Too Many Requests` response and appends the header `x-local-rate-limit: true`. This prevents a single user from exhausting the compute resources of the model service.
