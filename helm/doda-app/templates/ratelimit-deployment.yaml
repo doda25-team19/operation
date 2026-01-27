@@ -1,0 +1,51 @@
+{{- if and .Values.istio.rateLimiting.enabled (eq .Values.istio.rateLimiting.mode "global") }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-ratelimit
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-ratelimit
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-ratelimit
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+        - name: ratelimit
+          image: {{ .Values.istio.rateLimiting.image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: {{ .Values.istio.rateLimiting.service.port }}
+          env:
+            - name: LOG_LEVEL
+              value: "info"
+            - name: REDIS_SOCKET_TYPE
+              value: "tcp"
+            - name: REDIS_URL
+              value: "{{ .Values.istio.rateLimiting.redis.host }}:{{ .Values.istio.rateLimiting.redis.port }}"
+            - name: RUNTIME_ROOT
+              value: "/data"
+            - name: RUNTIME_SUBDIRECTORY
+              value: "ratelimit"
+            - name: RUNTIME_WATCH_ROOT
+              value: "false"
+            - name: CONFIG_TYPE
+              value: "file"
+            - name: CONFIG_GRPC_XDS
+              value: "false"
+            - name: CONFIG_FILE
+              value: "/data/ratelimit/ratelimit-config.yaml"
+          volumeMounts:
+            - name: ratelimit-config
+              mountPath: /data/ratelimit
+      volumes:
+        - name: ratelimit-config
+          configMap:
+            name: {{ .Release.Name }}-ratelimit-config
+{{- end }}

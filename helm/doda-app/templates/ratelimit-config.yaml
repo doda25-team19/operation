@@ -1,0 +1,15 @@
+{{- if and .Values.istio.rateLimiting.enabled (eq .Values.istio.rateLimiting.mode "global") }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-ratelimit-config
+  namespace: {{ .Release.Namespace }}
+data:
+  ratelimit-config.yaml: |
+    domain: {{ .Values.istio.rateLimiting.domain }}
+    descriptors:
+      - key: remote_address
+        rate_limit:
+          unit: minute
+          requests_per_unit: {{ .Values.istio.rateLimiting.requestsPerMinute }}
+{{- end }}

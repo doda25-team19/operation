@@ -13,6 +13,10 @@
 - name: General Kubernetes Setup
   hosts: all
   become: yes
+  vars:
+    # defaults, in case Vagrant doesn't pass them (safety net)
+    ip_base: "192.168.56"
+    num_workers: "{{ groups['workers'] | length }}"
   tasks:
   
     # -------------------------------
