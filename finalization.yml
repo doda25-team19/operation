@@ -55,6 +55,24 @@
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
 
+    # --- NEW: Create Default TLS Secret for Controller ---
+    - name: Create default TLS secret for Ingress Controller
+      ansible.builtin.command: >
+        kubectl create secret tls ingress-tls
+        --cert=/vagrant/tls/tls.crt
+        --key=/vagrant/tls/tls.key
+        --namespace=default
+        --dry-run=client -o yaml
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+      register: default_tls_secret_yaml
+
+    - name: Apply default TLS secret
+      ansible.builtin.shell: |
+        echo '{{ default_tls_secret_yaml.stdout }}' | kubectl apply -f -
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+    # -----------------------------------------------------
 
     - name: Add ingress nginx Helm repo
       ansible.builtin.command: >
@@ -76,6 +94,7 @@
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
 
+    # --- MODIFIED: Added default-ssl-certificate argument ---
     - name: Install or upgrade Nginx ingress controller
       ansible.builtin.command: >
         helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx
@@ -83,8 +102,10 @@
         --create-namespace
         --set controller.service.type=LoadBalancer
         --set controller.service.loadBalancerIP=192.168.56.90
+        --set controller.extraArgs.default-ssl-certificate=default/ingress-tls
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
+    # --------------------------------------------------------
 
     - name: Wait for ingress controller pods to be ready
       ansible.builtin.command: >
@@ -129,7 +150,7 @@
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
 
-    - name: Create TLS secret for HTTPS ingress
+    - name: Create TLS secret for HTTPS ingress (Dashboard Specific)
       ansible.builtin.command: >
         kubectl create secret tls dashboard-tls
         --cert=/vagrant/tls/tls.crt
@@ -140,7 +161,7 @@
         KUBECONFIG: /home/vagrant/.kube/config
       register: tls_secret_yaml
 
-    - name: Apply TLS secret
+    - name: Apply TLS secret (Dashboard Specific)
       ansible.builtin.shell: |
         echo '{{ tls_secret_yaml.stdout }}' | kubectl apply -f -
       environment:
@@ -151,7 +172,6 @@
         kubectl apply -f /vagrant/k8s/dashboard-ingress.yaml
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
-
 
     - name: Download Istio archive
       ansible.builtin.get_url:
@@ -207,3 +227,4 @@
         --timeout=300s
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
+        
