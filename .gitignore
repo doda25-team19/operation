@@ -1,3 +1,5 @@
 .vagrant/
 inventory.cfg
 kubeconfig
+istio-*/
+*.tar.gz
